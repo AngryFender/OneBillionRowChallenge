@@ -4,12 +4,15 @@
 #include <chrono>
 #include <vector>
 #include <unordered_map>
+#include <limits>
 constexpr int LINE_SIZE = 30;
 constexpr char DELIMITER = ';';
+constexpr double MIN_DOUBLE = std::numeric_limits<double>::lowest();
+constexpr double MAX_DOUBLE = std::numeric_limits<double>::max();
 
 struct Data {
-    double max = -DBL_MAX;
-    double min = DBL_MAX;
+    double max = MIN_DOUBLE;
+    double min = MAX_DOUBLE;
     double mean = 0;
     size_t count = 0;
 };
@@ -35,13 +38,13 @@ int main() {
         ss.clear();
         ss.str(line_buffer);
         if (std::getline(ss, place_buffer, DELIMITER) && std::getline(ss, value_buffer, DELIMITER)) {
-            auto& data = map[place_buffer];
+            auto& data = map.try_emplace(place_buffer).first->second;
             try {
                 v = std::stod(value_buffer);
-                data.min = std::min(v, data.min);
-                data.max = std::max(v, data.max);
-                data.mean += (v - data.mean) / ++data.count;
-            }catch(std::exception& ex){}
+            }catch (std::exception& ex) {}
+            data.min = std::min(v, data.min);
+            data.max = std::max(v, data.max);
+            data.mean += (v - data.mean) / ++data.count;
         }
         ++total;
     };
