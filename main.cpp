@@ -38,13 +38,14 @@ int main() {
         ss.clear();
         ss.str(line_buffer);
         if (std::getline(ss, place_buffer, DELIMITER) && std::getline(ss, value_buffer, DELIMITER)) {
-            auto& data = map.try_emplace(place_buffer).first->second;
             try {
                 v = std::stod(value_buffer);
-            }catch (std::exception& ex) {}
-            data.min = std::min(v, data.min);
-            data.max = std::max(v, data.max);
-            data.mean += (v - data.mean) / ++data.count;
+                auto& data = map.try_emplace(place_buffer).first->second;
+                data.min = std::min(v, data.min);
+                data.max = std::max(v, data.max);
+                data.mean += (v - data.mean) / ++data.count;
+            }
+            catch (std::exception& ex) {}
         }
         ++total;
     };
