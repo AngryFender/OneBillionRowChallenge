@@ -5,6 +5,12 @@
 #include <vector>
 #include <unordered_map>
 #include <limits>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+
 constexpr int LINE_SIZE = 30;
 constexpr char DELIMITER = ';';
 constexpr double MIN_DOUBLE = std::numeric_limits<double>::lowest();
@@ -16,6 +22,24 @@ struct Data {
     double mean = 0;
     size_t count = 0;
 };
+
+void mmap_method()
+{
+    int fd = open(DATA_FILE_PATH,O_RDONLY);
+
+    struct stat st;
+    fstat(fd,&st);
+    size_t size = st.st_size;
+
+    void* addr = mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fd, 0);
+
+
+    //cleanup
+    munmap(addr,size);
+    close(fd);
+}
+
+
 
 int main() {
 
@@ -50,9 +74,9 @@ int main() {
         ++total;
     };
 
-    for (const auto& [key,data] : map) {
-		std::cout << key << "," << data.min << "," << data.mean << "," << data.max << "," << data.count << "\n";
-    }
+  //   for (const auto& [key,data] : map) {
+		// std::cout << key << "," << data.min << "," << data.mean << "," << data.max << "," << data.count << "\n";
+  //   }
     std::cout << "\nTotal = " << total << "\n";
     auto end_time = std::chrono::high_resolution_clock::now();
 	auto diff_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
