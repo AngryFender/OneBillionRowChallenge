@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <chrono>
+#include <cstring>
 #include <vector>
 #include <unordered_map>
 #include <limits>
@@ -31,10 +32,30 @@ void mmap_method()
     fstat(fd,&st);
     size_t size = st.st_size;
 
+    std::cout << "the size of the file = " << std::to_string(size) << "\n";
     void* addr = mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fd, 0);
 
+    if(addr == reinterpret_cast<void*>(-1))
+    {
+        std::cerr << "failed registering mmap of the file: " << strerror(errno) << "\n";
+        return;
+    }
 
-    //cleanup
+    char *begin = static_cast<char*>(addr);
+    char *end = begin + size;
+
+    char *line_start = begin;
+    for(char* i = begin; i < end; ++i)
+    {
+        if(*i == '\n')
+        {
+            std::string_view line(line_start, i - line_start);
+
+            line_start = i+1;
+        }
+    }
+
+    // cleanup
     munmap(addr,size);
     close(fd);
 }
@@ -74,12 +95,19 @@ int main() {
         ++total;
     };
 
-  //   for (const auto& [key,data] : map) {
-		// std::cout << key << "," << data.min << "," << data.mean << "," << data.max << "," << data.count << "\n";
-  //   }
+    //for (const auto& [key,data] : map) {
+    //   std::cout << key << "," << data.min << "," << data.mean << "," << data.max << "," << data.count << "\n";
+    //}
+
     std::cout << "\nTotal = " << total << "\n";
     auto end_time = std::chrono::high_resolution_clock::now();
 	auto diff_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
     std::cout << "Time take =" << diff_time << " milliseconds\n";
+
+    auto start_time_mm = std::chrono::high_resolution_clock::now();
+    mmap_method();
+    auto end_time_mm = std::chrono::high_resolution_clock::now();
+    auto diff_time_mm = std::chrono::duration_cast<std::chrono::microseconds>(end_time_mm - start_time_mm).count();
+    std::cout << "Time take =" << diff_time_mm << " microseconds\n";
     return 0;
 }
