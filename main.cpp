@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-
+#include <charconv>
 
 constexpr int LINE_SIZE = 30;
 constexpr char DELIMITER = ';';
@@ -32,7 +32,7 @@ void mmap_method()
     fstat(fd,&st);
     size_t size = st.st_size;
 
-    std::cout << "the size of the file = " << std::to_string(size) << "\n";
+    std::cout << "\nthe size of the file = " << std::to_string(size) << "\n";
     void* addr = mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fd, 0);
 
     if(addr == reinterpret_cast<void*>(-1))
@@ -43,15 +43,43 @@ void mmap_method()
 
     char *begin = static_cast<char*>(addr);
     char *end = begin + size;
+    std::string_view view(begin, end);
 
-    char *line_start = begin;
-    for(char* i = begin; i < end; ++i)
+
+    std::pair<size_t, size_t> city{0, 0}; //first = starting pos, second = count of characters after first
+    std::pair<size_t, size_t> temp{0, 0}; //first = starting pos, second = count of characters after first
+
+    std::unordered_map<std::string_view, Data> map;
+
+    std::string_view value_view;
+    double value = 0;
+
+    for(size_t i = 0; i < size; ++i)
     {
-        if(*i == '\n')
+        switch(view[i])
         {
-            std::string_view line(line_start, i - line_start);
+        case ';':
+            {
+                city.second = i - city.first;
+                temp.first = i + 1;
+                break;
+            }
+        case '\n':
+            {
+                auto& [max, min,mean, count] = map.try_emplace(view.substr(city.first, city.second)).first->second;
 
-            line_start = i+1;
+                // parse float using from_chars -> value
+                value_view = view.substr(temp.first, i-temp.first);
+                auto [ptr, ec] = std::from_chars(value_view.data(), value_view.data()+value_view.size(), value);
+
+                min = std::min(value, min);
+                max = std::max(value, max);
+                mean += (value - mean) / static_cast<double>(++count);
+
+                city.first = i + 1;
+                break;
+            }
+            default:break;
         }
     }
 
@@ -99,15 +127,15 @@ int main() {
     //   std::cout << key << "," << data.min << "," << data.mean << "," << data.max << "," << data.count << "\n";
     //}
 
-    std::cout << "\nTotal = " << total << "\n";
+    std::cout << "\nTotal rows = " << total << "\n";
     auto end_time = std::chrono::high_resolution_clock::now();
-	auto diff_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
-    std::cout << "Time take =" << diff_time << " milliseconds\n";
+	auto diff_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
+    std::cout << "Time taken = " << diff_time << " milliseconds\n";
 
     auto start_time_mm = std::chrono::high_resolution_clock::now();
     mmap_method();
     auto end_time_mm = std::chrono::high_resolution_clock::now();
     auto diff_time_mm = std::chrono::duration_cast<std::chrono::microseconds>(end_time_mm - start_time_mm).count();
-    std::cout << "Time take =" << diff_time_mm << " microseconds\n";
+    std::cout << "Time taken = " << diff_time_mm << " microseconds\n";
     return 0;
 }
