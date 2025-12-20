@@ -11,6 +11,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <charconv>
+#include <thread>
 #include <boost/flyweight.hpp>
 
 constexpr int LINE_SIZE = 30;
@@ -119,38 +120,53 @@ void mmap_with_thread_method()
     std::string_view value_view;
     double value = 0;
 
-    for(size_t i = 0; i < size; ++i)
+    std::mutex mutex;
+
+    int thread_total = 8;
+    std::vector<std::thread> thread_collection;
+
+    std::atomic_int32_t count = 0;;
+
+    for (int t = 0; t < thread_total; ++t)
     {
-        switch(view[i])
-        {
-        case ';':
+        thread_collection.emplace_back([&](){
+            for (size_t i = 0; i < size; ++i)
             {
-                city.second = i - city.first;
-                temp.first = i + 1;
-                break;
+                switch (view[i])
+                {
+                case ';':
+                    {
+                        city.second = i - city.first;
+                        temp.first = i + 1;
+                        break;
+                    }
+                case '\n':
+                    {
+                        std::lock_guard lock(mutex);
+                        auto& [max, min,mean, count] = map.try_emplace(view.substr(city.first, city.second)).first->
+                                                           second;
+
+                        // parse float using from_chars -> value
+                        value_view = view.substr(temp.first, i - temp.first);
+                        auto [ptr, ec] = std::from_chars(value_view.data(), value_view.data() + value_view.size(),
+                                                         value);
+
+                        min = std::min(value, min);
+                        max = std::max(value, max);
+                        mean += (value - mean) / static_cast<double>(++count);
+
+                        city.first = i + 1;
+                        break;
+                    }
+                default: break;
+                }
             }
-        case '\n':
-            {
-                auto& [max, min,mean, count] = map.try_emplace(view.substr(city.first, city.second)).first->second;
+        });
 
-                // parse float using from_chars -> value
-                value_view = view.substr(temp.first, i-temp.first);
-                auto [ptr, ec] = std::from_chars(value_view.data(), value_view.data()+value_view.size(), value);
-
-                min = std::min(value, min);
-                max = std::max(value, max);
-                mean += (value - mean) / static_cast<double>(++count);
-
-                city.first = i + 1;
-                break;
-            }
-            default:break;
-        }
+        // cleanup
+        munmap(addr,size);
+        close(fd);
     }
-
-    // cleanup
-    munmap(addr,size);
-    close(fd);
 }
 
 void mmap_flyweight_method()
@@ -279,6 +295,12 @@ int main() {
     auto diff_time_mm = std::chrono::duration_cast<std::chrono::microseconds>(end_time_mm - start_time_mm).count();
     std::cout << "Memory Mapping Time taken = " << diff_time_mm << " microseconds\n";
 
+    auto start_time_mm_mt = std::chrono::high_resolution_clock::now();
+    mmap_with_thread_method();
+    auto end_time_mm_mt = std::chrono::high_resolution_clock::now();
+    auto diff_time_mm_mt = std::chrono::duration_cast<std::chrono::microseconds>(end_time_mm_mt - start_time_mm_mt).count();
+    std::cout << "Memory Mapping MultiThreading Time taken = " << diff_time_mm_mt << " microseconds\n";
+
     auto start_time_mm_fly = std::chrono::high_resolution_clock::now();
     mmap_flyweight_method();
     auto end_time_mm_fly = std::chrono::high_resolution_clock::now();
@@ -287,3 +309,24 @@ int main() {
 
     return 0;
 }
+
+// #include <string>
+//
+// int main()
+// {
+//
+//     using Symbol = boost::flyweight<std::string>;
+//
+//     Symbol s1("APPL");
+//     Symbol s2("APPL");
+//     Symbol s3("VODL");
+//
+//
+//     std::string value = "APPl";
+//     std::string_view view(value.begin(), value.end());
+//     Symbol x(view);
+//     Symbol x1(view);
+//     Symbol x2(view);
+//
+//     return 0;
+// }
