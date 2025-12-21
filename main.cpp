@@ -90,6 +90,44 @@ void mmap_method()
     close(fd);
 }
 
+void do_work(std::string_view view, const size_t start, const size_t end, std::pair<size_t, size_t>& city,
+             std::pair<size_t, size_t>& temp, std::unordered_map<std::string_view, Data> map, std::mutex& mutex)
+{
+    std::string_view value_view;
+    double value = 0;
+    for (size_t i = start; i < end; ++i)
+    {
+        switch (view[i])
+        {
+        case ';':
+            {
+                city.second = i - city.first;
+                temp.first = i + 1;
+                break;
+            }
+        case '\n':
+            {
+                std::lock_guard lock(mutex);
+                auto& [max, min,mean, count] = map.try_emplace(view.substr(city.first, city.second)).first->
+                                                   second;
+
+                // parse float using from_chars -> value
+                value_view = view.substr(temp.first, i - temp.first);
+                auto [ptr, ec] = std::from_chars(value_view.data(), value_view.data() + value_view.size(),
+                                                 value);
+
+                min = std::min(value, min);
+                max = std::max(value, max);
+                mean += (value - mean) / static_cast<double>(++count);
+
+                city.first = i + 1;
+                break;
+            }
+        default: break;
+        }
+    }
+}
+
 void mmap_with_thread_method()
 {
     int fd = open(DATA_FILE_PATH,O_RDONLY);
@@ -122,50 +160,26 @@ void mmap_with_thread_method()
 
     std::mutex mutex;
 
-    int thread_total = 8;
-    std::vector<std::thread> thread_collection;
+    int thread_total = 1;
+    std::vector<std::thread> thread_collection(thread_total);
 
     std::atomic_int32_t count = 0;;
 
     for (int t = 0; t < thread_total; ++t)
     {
-        thread_collection.emplace_back([&](){
-            for (size_t i = 0; i < size; ++i)
-            {
-                switch (view[i])
-                {
-                case ';':
-                    {
-                        city.second = i - city.first;
-                        temp.first = i + 1;
-                        break;
-                    }
-                case '\n':
-                    {
-                        std::lock_guard lock(mutex);
-                        auto& [max, min,mean, count] = map.try_emplace(view.substr(city.first, city.second)).first->
-                                                           second;
-
-                        // parse float using from_chars -> value
-                        value_view = view.substr(temp.first, i - temp.first);
-                        auto [ptr, ec] = std::from_chars(value_view.data(), value_view.data() + value_view.size(),
-                                                         value);
-
-                        min = std::min(value, min);
-                        max = std::max(value, max);
-                        mean += (value - mean) / static_cast<double>(++count);
-
-                        city.first = i + 1;
-                        break;
-                    }
-                default: break;
-                }
-            }
+        thread_collection.emplace_back([&, view](){
+            do_work(view,0 , size, city,temp, map, mutex);
         });
 
         // cleanup
         munmap(addr,size);
         close(fd);
+    }
+
+    for(auto& t : thread_collection)
+    {
+        if(t.joinable())
+            t.join();
     }
 }
 
