@@ -171,9 +171,7 @@ void mmap_with_thread_method()
             do_work(view,0 , size, city,temp, map, mutex);
         });
 
-        // cleanup
-        munmap(addr,size);
-        close(fd);
+
     }
 
     for(auto& t : thread_collection)
@@ -181,6 +179,10 @@ void mmap_with_thread_method()
         if(t.joinable())
             t.join();
     }
+
+    // cleanup
+    munmap(addr,size);
+    close(fd);
 }
 
 void mmap_flyweight_method()
