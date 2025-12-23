@@ -163,15 +163,16 @@ void mmap_with_thread_method()
     int thread_total = 1;
     std::vector<std::thread> thread_collection(thread_total);
 
-    std::atomic_int32_t count = 0;;
+    std::atomic_int32_t high = 1;
+    std::atomic_int32_t low = 0;
+    const size_t factor = size / thread_total;
+    
 
     for (int t = 0; t < thread_total; ++t)
     {
-        thread_collection.emplace_back([&, view](){
-            do_work(view,0 , size, city,temp, map, mutex);
+        thread_collection.emplace_back([view, &]=(){
+            do_work(view,++low * factor, ++high * factor, city,temp, map, mutex);
         });
-
-
     }
 
     for(auto& t : thread_collection)
