@@ -90,11 +90,13 @@ void mmap_method()
     close(fd);
 }
 
-void do_work(std::string_view view, const size_t start, const size_t end, std::pair<size_t, size_t>& city,
-             std::pair<size_t, size_t>& temp, std::unordered_map<std::string_view, Data> map, std::mutex& mutex)
+void do_work(std::string_view view, const size_t start, const size_t end, std::unordered_map<std::string_view, Data> map, std::mutex& mutex)
 {
     std::string_view value_view;
     double value = 0;
+    std::pair<size_t, size_t> city{0, 0}; //first = starting pos, second = count of characters after first
+    std::pair<size_t, size_t> temp{0, 0}; //first = starting pos, second = count of characters after first
+
     for (size_t i = start; i < end; ++i)
     {
         switch (view[i])
@@ -150,8 +152,6 @@ void mmap_with_thread_method()
     std::string_view view(begin, end);
 
 
-    std::pair<size_t, size_t> city{0, 0}; //first = starting pos, second = count of characters after first
-    std::pair<size_t, size_t> temp{0, 0}; //first = starting pos, second = count of characters after first
 
     std::unordered_map<std::string_view, Data> map;
 
@@ -170,8 +170,8 @@ void mmap_with_thread_method()
 
     for (int t = 0; t < thread_total; ++t)
     {
-        thread_collection.emplace_back([view, &]=(){
-            do_work(view,++low * factor, ++high * factor, city,temp, map, mutex);
+        thread_collection.emplace_back([&,view](){
+            do_work(view,low++ * factor, high++ * factor, map, mutex);
         });
     }
 
