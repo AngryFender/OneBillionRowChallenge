@@ -90,7 +90,7 @@ void mmap_method()
     close(fd);
 }
 
-void do_work(std::string_view view, const size_t start, const size_t end, std::unordered_map<std::string_view, Data> map, std::mutex& mutex)
+void do_work(std::string_view view, const size_t start, const size_t end, std::unordered_map<std::string_view, Data>& map, std::mutex& mutex)
 {
     std::string_view value_view;
     double value = 0;
@@ -109,18 +109,18 @@ void do_work(std::string_view view, const size_t start, const size_t end, std::u
             }
         case '\n':
             {
-                std::lock_guard lock(mutex);
-                auto& [max, min,mean, count] = map.try_emplace(view.substr(city.first, city.second)).first->
-                                                   second;
-
                 // parse float using from_chars -> value
                 value_view = view.substr(temp.first, i - temp.first);
-                auto [ptr, ec] = std::from_chars(value_view.data(), value_view.data() + value_view.size(),
-                                                 value);
+                auto [ptr, ec] = std::from_chars(value_view.data(), value_view.data() + value_view.size(),value);
 
-                min = std::min(value, min);
-                max = std::max(value, max);
-                mean += (value - mean) / static_cast<double>(++count);
+                {
+                    std::lock_guard lock(mutex);
+                    auto& [max, min,mean, count] = map.try_emplace(view.substr(city.first, city.second)).first->second;
+
+                    min = std::min(value, min);
+                    max = std::max(value, max);
+                    mean += (value - mean) / static_cast<double>(++count);
+                }
 
                 city.first = i + 1;
                 break;
@@ -151,27 +151,20 @@ void mmap_with_thread_method()
     char *end = begin + size;
     std::string_view view(begin, end);
 
-
-
     std::unordered_map<std::string_view, Data> map;
 
-    std::string_view value_view;
-    double value = 0;
-
     std::mutex mutex;
-
-    int thread_total = 1;
+    constexpr int thread_total = 16;
     std::vector<std::thread> thread_collection(thread_total);
 
-    std::atomic_int32_t high = 1;
-    std::atomic_int32_t low = 0;
+    std::atomic_int64_t high = 0;
+    std::atomic_int64_t low = -1;
     const size_t factor = size / thread_total;
     
-
     for (int t = 0; t < thread_total; ++t)
     {
         thread_collection.emplace_back([&,view](){
-            do_work(view,low++ * factor, high++ * factor, map, mutex);
+            do_work(view,++low * factor, ++high * factor, map, mutex);
         });
     }
 
