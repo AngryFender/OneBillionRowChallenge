@@ -154,17 +154,24 @@ void mmap_with_thread_method()
     std::unordered_map<std::string_view, Data> map;
 
     std::mutex mutex;
-    constexpr int thread_total = 16;
+    constexpr int thread_total = 2;
     std::vector<std::thread> thread_collection(thread_total);
 
-    std::atomic_int64_t high = 0;
-    std::atomic_int64_t low = -1;
+    int64_t high = 0;
+    int64_t low = -1;
     const size_t factor = size / thread_total;
+
+    std::vector<std::pair<size_t, size_t>> ranges;
+    ranges.reserve(thread_total);
+    for(int t = 0; t < thread_total;++t)
+    {
+        ranges.emplace_back(++low * factor, std::min(++high * factor, size));
+    }
     
     for (int t = 0; t < thread_total; ++t)
     {
         thread_collection.emplace_back([&,view](){
-            do_work(view,++low * factor, ++high * factor, map, mutex);
+            do_work(view,ranges[t].first, ranges[t].second, map, mutex);
         });
     }
 
