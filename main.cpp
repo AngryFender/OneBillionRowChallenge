@@ -26,6 +26,42 @@ struct Data {
     size_t count = 0;
 };
 
+void do_work_one_thread(std::string_view view, const size_t start, const size_t end, std::unordered_map<std::string_view, Data>& map)
+{
+    std::string_view value_view;
+    double value = 0;
+    std::pair<size_t, size_t> city{0, 0}; //first = starting pos, second = count of characters after first
+    std::pair<size_t, size_t> temp{0, 0}; //first = starting pos, second = count of characters after first
+
+    for (size_t i = start; i < end; ++i)
+    {
+        switch (view[i])
+        {
+        case ';':
+            {
+                city.second = i - city.first;
+                temp.first = i + 1;
+                break;
+            }
+        case '\n':
+            {
+                // parse float using from_chars -> value
+                value_view = view.substr(temp.first, i - temp.first);
+                auto [ptr, ec] = std::from_chars(value_view.data(), value_view.data() + value_view.size(),value);
+
+                    auto& [max, min,mean, count] = map.try_emplace(view.substr(city.first, city.second)).first->second;
+
+                    min = std::min(value, min);
+                    max = std::max(value, max);
+                    mean += (value - mean) / static_cast<double>(++count);
+
+                city.first = i + 1;
+                break;
+            }
+        default: break;
+        }
+    }
+}
 void mmap_method()
 {
     int fd = open(DATA_FILE_PATH,O_RDONLY);
