@@ -166,7 +166,64 @@ void do_work(std::string_view view, const size_t start, const size_t end, std::u
     }
 }
 
-void mmap_with_thread_method()
+void mmap_with_one_spawn_thread_method()
+{
+    int fd = open(DATA_FILE_PATH,O_RDONLY);
+
+    struct stat st;
+    fstat(fd,&st);
+    size_t size = st.st_size;
+
+    std::cout << "\nthe size of the file = " << std::to_string(size) << "\n";
+    void* addr = mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fd, 0);
+
+    if(addr == reinterpret_cast<void*>(-1))
+    {
+        std::cerr << "failed registering mmap of the file: " << strerror(errno) << "\n";
+        return;
+    }
+
+    char *begin = static_cast<char*>(addr);
+    char *end = begin + size;
+    std::string_view view(begin, end);
+
+    std::unordered_map<std::string_view, Data> map;
+
+    std::mutex mutex;
+    constexpr int thread_total = 1;
+    std::vector<std::thread> thread_collection;
+    thread_collection.reserve(thread_total);
+
+    int64_t high = 0;
+    int64_t low = -1;
+    const size_t factor = size / thread_total;
+
+    std::vector<std::pair<size_t, size_t>> ranges;
+    ranges.reserve(thread_total);
+    for(int t = 0; t < thread_total;++t)
+    {
+        ranges.emplace_back(++low * factor, std::min(++high * factor, size));
+    }
+
+    for (int t = 0; t < thread_total; ++t)
+    {
+        thread_collection.emplace_back([&,view](){
+            do_work_one_thread(view, ranges[t].first, ranges[t].second,map);
+        });
+    }
+
+    for(auto& t : thread_collection)
+    {
+        if(t.joinable())
+            t.join();
+    }
+
+    // cleanup
+    munmap(addr,size);
+    close(fd);
+}
+
+void mmap_with_multi_thread_method()
 {
     int fd = open(DATA_FILE_PATH,O_RDONLY);
 
@@ -191,7 +248,8 @@ void mmap_with_thread_method()
 
     std::mutex mutex;
     constexpr int thread_total = 2;
-    std::vector<std::thread> thread_collection(thread_total);
+    std::vector<std::thread> thread_collection;
+    thread_collection.reserve(thread_total);
 
     int64_t high = 0;
     int64_t low = -1;
@@ -348,8 +406,14 @@ int main() {
     auto diff_time_mm = std::chrono::duration_cast<std::chrono::microseconds>(end_time_mm - start_time_mm).count();
     std::cout << "Memory Mapping Time taken = " << diff_time_mm << " microseconds\n";
 
+    auto start_time_mm_st = std::chrono::high_resolution_clock::now();
+    mmap_with_one_spawn_thread_method();
+    auto end_time_mm_st = std::chrono::high_resolution_clock::now();
+    auto diff_time_mm_st = std::chrono::duration_cast<std::chrono::microseconds>(end_time_mm_st - start_time_mm_st).count();
+    std::cout << "Memory Mapping One spawn thread Time taken = " << diff_time_mm_st << " microseconds\n";
+
     auto start_time_mm_mt = std::chrono::high_resolution_clock::now();
-    mmap_with_thread_method();
+    mmap_with_multi_thread_method();
     auto end_time_mm_mt = std::chrono::high_resolution_clock::now();
     auto diff_time_mm_mt = std::chrono::duration_cast<std::chrono::microseconds>(end_time_mm_mt - start_time_mm_mt).count();
     std::cout << "Memory Mapping MultiThreading Time taken = " << diff_time_mm_mt << " microseconds\n";
