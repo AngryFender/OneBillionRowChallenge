@@ -165,6 +165,44 @@ void do_work(std::string_view view, const size_t start, const size_t end, std::u
         }
     }
 }
+std::unordered_map<std::string_view, Data> do_work_independently(std::string_view view, const size_t start, const size_t end)
+{
+    std::string_view value_view;
+    double value = 0;
+    std::pair<size_t, size_t> city{0, 0}; //first = starting pos, second = count of characters after first
+    std::pair<size_t, size_t> temp{0, 0}; //first = starting pos, second = count of characters after first
+    std::unordered_map<std::string_view, Data> map;
+
+    for (size_t i = start; i < end; ++i)
+    {
+        switch (view[i])
+        {
+        case ';':
+            {
+                city.second = i - city.first;
+                temp.first = i + 1;
+                break;
+            }
+        case '\n':
+            {
+                // parse float using from_chars -> value
+                value_view = view.substr(temp.first, i - temp.first);
+                auto [ptr, ec] = std::from_chars(value_view.data(), value_view.data() + value_view.size(), value);
+
+                auto& [max, min,mean, count] = map.try_emplace(view.substr(city.first, city.second)).first->second;
+
+                min = std::min(value, min);
+                max = std::max(value, max);
+                mean += (value - mean) / static_cast<double>(++count);
+
+                city.first = i + 1;
+                break;
+            }
+        default: break;
+        }
+    }
+    return map;
+}
 
 void mmap_with_one_spawn_thread_method()
 {
@@ -247,7 +285,7 @@ void mmap_with_multi_thread_method()
     std::unordered_map<std::string_view, Data> map;
 
     std::mutex mutex;
-    constexpr int thread_total = 2;
+    constexpr int thread_total = 16;
     std::vector<std::thread> thread_collection;
     thread_collection.reserve(thread_total);
 
@@ -265,7 +303,7 @@ void mmap_with_multi_thread_method()
     for (int t = 0; t < thread_total; ++t)
     {
         thread_collection.emplace_back([&,view](){
-            do_work(view,ranges[t].first, ranges[t].second, map, mutex);
+            do_work_independently(view,ranges[t].first,std::min( ranges[t].second, size));
         });
     }
 
