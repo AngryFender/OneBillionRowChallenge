@@ -9,7 +9,12 @@ find_package(Boost REQUIRED)
 get_property(imported_targets DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" PROPERTY IMPORTED_TARGETS)
 MESSAGE(STATUS "Imported targets ➜ ${imported_targets}")
 
-add_executable(OneBillionRowChallenge main.cpp)
+add_executable(OneBillionRowChallenge main.cpp
+		iparser.h
+		Strategies/istrategy.h
+		parser.cpp
+		parser.h
+)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
 	DATA_FILE_PATH=\"${DATA_FILE_PATH}\"
