@@ -4,7 +4,8 @@
 class IParser
 {
 public:
-    ~IParser() = default;
+    virtual ~IParser() = default;
+    virtual bool start() = 0;
 };
 
 #endif //IPARSER_H
