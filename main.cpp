@@ -16,15 +16,6 @@
 
 constexpr int LINE_SIZE = 30;
 constexpr char DELIMITER = ';';
-constexpr double MIN_DOUBLE = std::numeric_limits<double>::lowest();
-constexpr double MAX_DOUBLE = std::numeric_limits<double>::max();
-
-struct Data {
-    double max = MIN_DOUBLE;
-    double min = MAX_DOUBLE;
-    double mean = 0;
-    size_t count = 0;
-};
 
 void do_work_one_thread(std::string_view view, const size_t start, const size_t end, std::unordered_map<std::string_view, Data>& map)
 {

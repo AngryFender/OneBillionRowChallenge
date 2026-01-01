@@ -14,6 +14,8 @@ add_executable(OneBillionRowChallenge main.cpp
 		Strategies/istrategy.h
 		parser.cpp
 		parser.h
+		constants.h
+		data.h
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
