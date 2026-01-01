@@ -14,6 +14,8 @@ add_executable(OneBillionRowChallenge main.cpp
 		Strategies/istrategy.h
 		mmparser.cpp
 		mmparser.h
+		naiveparser.cpp
+		naiveparser.h
 		constants.h
 		data.h
 )
