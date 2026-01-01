@@ -9,10 +9,10 @@
 #include "iparser.h"
 #include "Strategies/istrategy.h"
 
-class Parser : public IParser
+class MMParser : public IParser
 {
 public:
-    Parser(const char* path, std::unique_ptr<IStrategy> strategy): _strategy(std::move(strategy)){
+    MMParser(const char* path, std::unique_ptr<IStrategy> strategy): _strategy(std::move(strategy)){
         _fd = open(path,O_RDONLY);
 
         struct stat st{};
@@ -39,7 +39,7 @@ public:
         return true;
     }
 
-    ~Parser() override{
+    ~MMParser() override{
         munmap(_addr, _size);
         close(_fd);
     }

@@ -12,8 +12,8 @@ MESSAGE(STATUS "Imported targets ➜ ${imported_targets}")
 add_executable(OneBillionRowChallenge main.cpp
 		iparser.h
 		Strategies/istrategy.h
-		parser.cpp
-		parser.h
+		mmparser.cpp
+		mmparser.h
 		constants.h
 		data.h
 )
