@@ -18,6 +18,7 @@ add_executable(OneBillionRowChallenge main.cpp
 		naiveparser.h
 		constants.h
 		data.h
+		Strategies/parentthread.h
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
