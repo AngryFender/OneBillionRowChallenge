@@ -15,6 +15,8 @@
 #include <boost/flyweight.hpp>
 
 #include "naiveparser.h"
+#include "mmparser.h"
+#include "Strategies/parentthread.h"
 
 constexpr int LINE_SIZE = 30;
 constexpr char DELIMITER = ';';
@@ -382,6 +384,11 @@ int main() {
 
     NaiveParser naive(DATA_FILE_PATH);
     naive.start();
+
+    {
+        MMParser parent_thread_mm_parser(DATA_FILE_PATH, std::make_unique<ParentThread>());
+        parent_thread_mm_parser.start();
+    }
 
     auto start_time_mm = std::chrono::high_resolution_clock::now();
     mmap_method();

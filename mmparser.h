@@ -17,38 +17,23 @@ public:
 
         struct stat st{};
         fstat(_fd, &st);
-        _size = st.st_size;
+        _file_size = st.st_size;
 
-        _addr = mmap(nullptr, _size, PROT_READ, MAP_PRIVATE, _fd, 0);
-        std::cout << "\nthe size of the file = " << std::to_string(_size) << "\n";
+        _mm_addr = mmap(nullptr, _file_size, PROT_READ, MAP_PRIVATE, _fd, 0);
     }
 
-    bool start() override
-    {
-        if (_addr == reinterpret_cast<void*>(-1))
-        {
-            std::cerr << "failed registering mmap of the file: " << strerror(errno) << "\n";
-            return false;
-        }
-
-        const char* begin = static_cast<char*>(_addr);
-        const char* end = begin + _size;
-        const std::string_view view(begin, end);
-        _strategy->parse(view);
-
-        return true;
-    }
+    bool start() override;
 
     ~MMParser() override{
-        munmap(_addr, _size);
+        munmap(_mm_addr, _file_size);
         close(_fd);
     }
 
 private:
     std::unique_ptr<IStrategy> _strategy;
-    int _fd = NULL;
-    size_t _size = 0;
-    void* _addr;
+    int _fd = 0;
+    size_t _file_size = 0;
+    void* _mm_addr;
 };
 
 #endif //PARSER_H
