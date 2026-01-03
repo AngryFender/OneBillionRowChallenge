@@ -17,6 +17,7 @@
 #include "naiveparser.h"
 #include "mmparser.h"
 #include "Strategies/parentthread.h"
+#include "Strategies/singlethreadspawn.h"
 
 constexpr int LINE_SIZE = 30;
 constexpr char DELIMITER = ';';
@@ -241,7 +242,7 @@ void mmap_with_one_spawn_thread_method()
     for (int t = 0; t < thread_total; ++t)
     {
         thread_collection.emplace_back([&,view](){
-            do_work_one_thread(view, ranges[t].first, ranges[t].second,map);
+            do_work_one_thread(view, 0, size,map);
         });
     }
 
@@ -388,6 +389,11 @@ int main() {
     {
         MMParser parent_thread_mm_parser(DATA_FILE_PATH, std::make_unique<ParentThread>());
         parent_thread_mm_parser.start();
+    }
+
+    {
+        MMParser single_thread_mm_parser(DATA_FILE_PATH, std::make_unique<SingleThreadSpawn>());
+        single_thread_mm_parser.start();
     }
 
     auto start_time_mm = std::chrono::high_resolution_clock::now();

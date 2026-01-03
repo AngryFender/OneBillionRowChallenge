@@ -1,5 +1,5 @@
 #include "mmparser.h"
-
+#include <iostream>
 #include <chrono>
 
 bool MMParser::start()
@@ -22,7 +22,7 @@ bool MMParser::start()
     const auto diff_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
 
     std::cout << "\nTotal lines = " << result.total_lines << "\n";
-    std::cout << result.name <<" time taken = " << diff_time.count() << " microseconds\n";
+    std::cout << "Memory map : " << result.name << " time taken = " << diff_time.count() << " microseconds\n";
 
     return true;
 }

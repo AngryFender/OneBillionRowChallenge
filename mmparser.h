@@ -5,7 +5,6 @@
 #include <memory>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <iostream>
 #include "iparser.h"
 #include "Strategies/istrategy.h"
 
