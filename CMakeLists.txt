@@ -20,6 +20,7 @@ add_executable(OneBillionRowChallenge main.cpp
 		data.h
 		Strategies/parentthread.h
 		Strategies/singlethreadspawn.h
+		Strategies/multithreadspawn.h
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
