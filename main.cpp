@@ -16,6 +16,7 @@
 
 #include "naiveparser.h"
 #include "mmparser.h"
+#include "Strategies/multithreadspawn.h"
 #include "Strategies/parentthread.h"
 #include "Strategies/singlethreadspawn.h"
 
@@ -295,7 +296,7 @@ void mmap_with_multi_thread_method()
     {
         ranges.emplace_back(++low * factor, std::min(++high * factor, size));
     }
-    
+
     for (int t = 0; t < thread_total; ++t)
     {
         thread_collection.emplace_back([&,view](){
@@ -382,37 +383,24 @@ void mmap_flyweight_method()
 }
 
 int main() {
-
     NaiveParser naive(DATA_FILE_PATH);
     naive.start();
-
     {
         MMParser parent_thread_mm_parser(DATA_FILE_PATH, std::make_unique<ParentThread>());
         parent_thread_mm_parser.start();
     }
-
     {
         MMParser single_thread_mm_parser(DATA_FILE_PATH, std::make_unique<SingleThreadSpawn>());
         single_thread_mm_parser.start();
     }
 
-    auto start_time_mm = std::chrono::high_resolution_clock::now();
-    mmap_method();
-    auto end_time_mm = std::chrono::high_resolution_clock::now();
-    auto diff_time_mm = std::chrono::duration_cast<std::chrono::microseconds>(end_time_mm - start_time_mm).count();
-    std::cout << "Memory Mapping Time taken = " << diff_time_mm << " microseconds\n";
+    for (int t = 1; t <= 32; t = t * 2)
+    {
+        MMParser multi_thread_mm_parser(DATA_FILE_PATH, std::make_unique<MultiThreadSpawn>(t));
+        multi_thread_mm_parser.start();
+    }
 
-    auto start_time_mm_st = std::chrono::high_resolution_clock::now();
-    mmap_with_one_spawn_thread_method();
-    auto end_time_mm_st = std::chrono::high_resolution_clock::now();
-    auto diff_time_mm_st = std::chrono::duration_cast<std::chrono::microseconds>(end_time_mm_st - start_time_mm_st).count();
-    std::cout << "Memory Mapping One spawn thread Time taken = " << diff_time_mm_st << " microseconds\n";
 
-    auto start_time_mm_mt = std::chrono::high_resolution_clock::now();
-    mmap_with_multi_thread_method();
-    auto end_time_mm_mt = std::chrono::high_resolution_clock::now();
-    auto diff_time_mm_mt = std::chrono::duration_cast<std::chrono::microseconds>(end_time_mm_mt - start_time_mm_mt).count();
-    std::cout << "Memory Mapping MultiThreading Time taken = " << diff_time_mm_mt << " microseconds\n";
 
     auto start_time_mm_fly = std::chrono::high_resolution_clock::now();
     mmap_flyweight_method();
