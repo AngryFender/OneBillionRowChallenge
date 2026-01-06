@@ -1,15 +1,16 @@
 #ifndef DATA_H
 #define DATA_H
+#include <cstdint>
 #include <limits>
 
-constexpr double MIN_DOUBLE = std::numeric_limits<double>::lowest();
-constexpr double MAX_DOUBLE = std::numeric_limits<double>::max();
+constexpr double MIN_VALUE = std::numeric_limits<uint32_t>::lowest();
+constexpr double MAX_VALUE = std::numeric_limits<uint32_t>::max();
 
 struct Data {
-    double max = MIN_DOUBLE;
-    double min = MAX_DOUBLE;
-    double mean = 0;
-    size_t count = 0;
+    uint32_t max = MIN_VALUE;
+    uint32_t min = MAX_VALUE;
+    uint64_t sum = 0;
+    uint64_t count = 0;
 };
 
 
