@@ -3,6 +3,13 @@ project(OneBillionRowChallenge)
 
 set(CMAKE_CXX_STANDARD 20)
 
+# Add the flags to all build types
+add_compile_options(-fno-omit-frame-pointer)
+
+# Optional: Add detailed debug info even in Release mode
+# so 'perf' can show you source code lines
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ggdb3")
+
 set(DATA_FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Data/weather_stations.csv")
 
 find_package(Boost REQUIRED)
@@ -21,6 +28,7 @@ add_executable(OneBillionRowChallenge main.cpp
 		Strategies/parentthread.h
 		Strategies/singlethreadspawn.h
 		Strategies/multithreadspawn.h
+		helper.h
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
