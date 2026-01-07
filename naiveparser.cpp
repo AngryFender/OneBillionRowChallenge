@@ -2,6 +2,7 @@
 #include <chrono>
 #include <iostream>
 #include "constants.h"
+#include "helper.h"
 
 bool NaiveParser::start()
 {
@@ -16,6 +17,7 @@ bool NaiveParser::start()
     std::string line_buffer;
     line_buffer.reserve(GLOBAL::LINE_LEN);
 
+
     std::stringstream ss;
     std::string place_buffer;
     place_buffer.reserve(GLOBAL::LINE_LEN);
@@ -24,7 +26,7 @@ bool NaiveParser::start()
     value_buffer.reserve(GLOBAL::LINE_LEN);
 
     uint64_t total_lines = 0;
-    double value = 0;
+    uint32_t value = 0;
 
     while(std::getline(_file, line_buffer))
     {
@@ -33,16 +35,13 @@ bool NaiveParser::start()
         ss.str(line_buffer);
         while(std::getline(ss,place_buffer, GLOBAL::LINE_DELIMITER) && std::getline(ss,value_buffer, GLOBAL::LINE_END))
         {
-            auto [ptr, ec] = std::from_chars(value_buffer.data(), value_buffer.data() + value_buffer.size(), value);
-            if(ec != std::errc())
-            {
-                continue;
-            }
+            value = parse_value_str(value_buffer);
 
-            auto [max, min, mean, count] = _map.try_emplace(place_buffer,Data()).first->second;
+            auto [sum, max, min, count] = _map.try_emplace(place_buffer,Data()).first->second;
             max = std::max(max, value);
             min = std::min(min, value);
-            mean += (value - mean) / ++count;
+            sum += value - sum;
+            ++count;
         }
     }
 
