@@ -25,15 +25,15 @@ public:
         std::vector<std::thread> thread_collection;
         thread_collection.reserve(_thread_no);
 
-        double high = 0;
-        double low = -1;
-        const double factor = static_cast<double>(data.file_size) / static_cast<double>(_thread_no);
+        float high = 0;
+        float low = -1;
+        const float factor = static_cast<float>(data.file_size) / static_cast<float>(_thread_no);
 
-        std::vector<std::pair<double, double>> ranges;
+        std::vector<std::pair<float, float>> ranges;
         ranges.reserve(_thread_no);
         for (int t = 0; t < _thread_no; ++t)
         {
-            ranges.emplace_back(++low * factor, std::min(++high * factor, static_cast<double>(data.file_size)));
+            ranges.emplace_back(++low * factor, std::min(++high * factor, static_cast<float>(data.file_size)));
         }
 
         std::vector<uint64_t> line_count(_thread_no,0);
@@ -44,8 +44,7 @@ public:
                 std::pair<size_t, size_t> city{0, 0}; //first = starting pos, second = count of characters after first
                 std::pair<size_t, size_t> temp{0, 0}; //first = starting pos, second = count of characters after first
 
-                double value = 0;
-                std::string_view value_view;
+                uint32_t value = 0;
                 for (size_t i = start; i < end; ++i)
                 {
                     switch (view[i])
@@ -58,21 +57,17 @@ public:
                         }
                     case '\n':
                         {
-                            value_view = view.substr(temp.first, i - temp.first);
-                            const auto [ptr, ec] = std::from_chars(value_view.data(), value_view.data() + value_view.size(),
-                                                             value);
-                            if (ec != std::errc())
-                            {
-                                continue;
-                            }
-
+                            temp.second = i - temp.first;
+                            value = parse_value_view(view,temp);
                             {
                                 std::lock_guard lock(mutex);
-                                auto& [max, min,mean, count] = map.try_emplace(view.substr(city.first, city.second)).first->second;
+
+                                auto& [sum, max, min, count] = map.try_emplace(view.substr(city.first, city.second)).first->second;
 
                                 min = std::min(value, min);
                                 max = std::max(value, max);
-                                mean += (value - mean) / static_cast<double>(++count);
+                                sum += value;
+                                ++count;
 
                                 city.first = i + 1;
                                 ++line_count[t];
