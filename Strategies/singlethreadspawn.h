@@ -19,13 +19,11 @@ public:
 
         std::thread only_thread([&, view = data.view]
         {
-            std::string_view value_view;
-
             std::pair<size_t, size_t> city{0, 0}; //first = starting pos, second = count of characters after first
             std::pair<size_t, size_t> temp{0, 0}; //first = starting pos, second = count of characters after first
 
             std::unordered_map<std::string_view, Data> map;
-            double value = 0;
+            uint32_t value = 0;
             uint64_t total_lines = 0;
             for (size_t i = 0; i < data.file_size; ++i)
             {
@@ -39,20 +37,15 @@ public:
                     }
                 case '\n':
                     {
-                        auto& [max, min,mean, count] = map.try_emplace(view.substr(city.first, city.second)).first->
-                                                           second;
+                        temp.second = i - temp.first;
+                        auto& [sum, max, min, count] = map.try_emplace(view.substr(city.first, city.second)).first->second;
 
-                        value_view = view.substr(temp.first, i - temp.first);
-                        auto [ptr, ec] = std::from_chars(value_view.data(), value_view.data() + value_view.size(),
-                                                         value);
+                        value = parse_value_view(view, temp);
 
-                        if (ec != std::errc())
-                        {
-                            continue;
-                        }
                         min = std::min(value, min);
                         max = std::max(value, max);
-                        mean += (value - mean) / static_cast<double>(++count);
+                        sum += value;
+                        ++count;
 
                         city.first = i + 1;
                         ++total_lines;
