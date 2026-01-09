@@ -14,6 +14,7 @@
 #include <thread>
 #include <boost/flyweight.hpp>
 
+#include "helper.h"
 #include "naiveparser.h"
 #include "mmparser.h"
 #include "Strategies/multithreadspawn.h"
@@ -47,9 +48,7 @@ void mmap_flyweight_method()
     using Location = boost::flyweight<std::string>;
     std::unordered_map<Location, Data> map;
 
-    std::string_view value_view;
-    double value = 0;
-
+    uint32_t value = 0;
 
     for(size_t i = 0; i < size; ++i)
     {
@@ -63,17 +62,18 @@ void mmap_flyweight_method()
             }
         case '\n':
             {
+                temp.second = i - temp.first;
                 std::string_view location_view = view.substr(city.first, city.second);
                 Location fly(location_view);
-                auto& [max, min,mean, count] = map.try_emplace(fly).first->second;
+                auto& [sum, max, min, count] = map.try_emplace(fly).first->second;
 
                 // parse float using from_chars -> value
-                value_view = view.substr(temp.first, i-temp.first);
-                auto [ptr, ec] = std::from_chars(value_view.data(), value_view.data()+value_view.size(), value);
+                value = parse_value_view(view, temp);
 
                 min = std::min(value, min);
                 max = std::max(value, max);
-                mean += (value - mean) / static_cast<double>(++count);
+                sum += value;
+                ++count;
 
                 city.first = i + 1;
                 break;
@@ -94,6 +94,7 @@ int main() {
         MMParser parent_thread_mm_parser(DATA_FILE_PATH, std::make_unique<ParentThread>());
         parent_thread_mm_parser.start();
     }
+
     {
         MMParser single_thread_mm_parser(DATA_FILE_PATH, std::make_unique<SingleThreadSpawn>());
         single_thread_mm_parser.start();
@@ -104,8 +105,6 @@ int main() {
         MMParser multi_thread_mm_parser(DATA_FILE_PATH, std::make_unique<MultiThreadSpawn>(t));
         multi_thread_mm_parser.start();
     }
-
-
 
     auto start_time_mm_fly = std::chrono::high_resolution_clock::now();
     mmap_flyweight_method();
