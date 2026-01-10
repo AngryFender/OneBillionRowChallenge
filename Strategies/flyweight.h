@@ -6,6 +6,7 @@
 #include "istrategy.h"
 #include "../data.h"
 #include "../helper.h"
+#include <boost/flyweight.hpp>
 
 class Flyweight: public IStrategy
 {
