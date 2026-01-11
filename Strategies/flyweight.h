@@ -25,6 +25,7 @@ public:
         std::unordered_map<Location, Data> map;
 
         uint32_t value = 0;
+        uint64_t counts = 0;
 
         for (size_t i = 0; i < data.file_size; ++i)
         {
@@ -52,13 +53,14 @@ public:
                     ++count;
 
                     city.first = i + 1;
-                    ++result.total_lines;
+                    ++counts;
                     break;
                 }
             default: break;
             }
         }
-    };
+        result.total_lines = counts;
+    }
 };
 
 

@@ -18,7 +18,7 @@ public:
         fstat(_fd, &st);
         _file_size = st.st_size;
 
-        _mm_addr = mmap(nullptr, _file_size, PROT_READ, MAP_PRIVATE, _fd, 0);
+        _mm_addr = mmap(nullptr, _file_size, PROT_READ, MAP_PRIVATE|MAP_POPULATE, _fd, 0);
     }
 
     bool start() override;
