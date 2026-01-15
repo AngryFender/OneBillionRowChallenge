@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "../helper.h"
 #include "../data.h"
 #include "istrategy.h"
 
@@ -32,10 +33,16 @@ public:
 
         std::vector<std::pair<float, float>> ranges;
         ranges.reserve(_thread_no);
+
+        size_t curr = 0;
+        size_t prev = 0;
+
         for (int t = 0; t < _thread_no; ++t)
         {
-            ranges.emplace_back(++low * factor, std::min(++high * factor, static_cast<float>(data.file_size)));
-            maps.push_back(std::unordered_map<std::string_view, Data>());
+            curr = find_eol(data.view, static_cast<size_t>(std::min(++high * factor, static_cast<float>(data.file_size))), data.file_size);
+            ranges.emplace_back(prev, curr);
+            prev = ++curr;
+            maps.emplace_back();
         }
 
         std::vector<uint64_t> line_count(_thread_no,0);
