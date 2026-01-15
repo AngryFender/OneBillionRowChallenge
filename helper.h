@@ -33,9 +33,9 @@ inline uint32_t parse_value_str(const std::string& str)
     return value;
 }
 
-inline size_t find_eof(std::string_view view, size_t start)
+inline size_t find_eof(std::string_view view, size_t start, const size_t eof)
 {
-    while(view[start] != '\n')
+    while(view[start] != '\n' && eof > start+1)
     {
         ++start;
     }
