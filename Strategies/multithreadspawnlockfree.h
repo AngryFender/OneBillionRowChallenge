@@ -27,13 +27,28 @@ public:
         thread_collection.reserve(_thread_no);
         std::vector<map> maps;
 
-        float high = 0;
-        float low = -1;
+        //dividing the file into 2mb chunks
+        constexpr size_t chunk_size = 262144;
+        const size_t chunk_num = data.file_size/ chunk_size + 1;
+
+        std::vector<std::pair<float, float>> chunks;
+        chunks.reserve(chunk_num);
+
+        size_t lower = 0;
+        size_t higher = 0;
+        while (lower < data.file_size)
+        {
+            higher = std::min(data.file_size, higher+chunk_size);
+            chunks.emplace_back(lower,higher);
+            lower = higher+1;
+        }
+
         const float factor = static_cast<float>(data.file_size) / static_cast<float>(_thread_no);
 
         std::vector<std::pair<float, float>> ranges;
         ranges.reserve(_thread_no);
 
+        float high = 0;
         size_t curr = 0;
         size_t prev = 0;
 
