@@ -42,4 +42,13 @@ inline size_t find_eol(std::string_view view, size_t start, const size_t eof)
     return start;
 }
 
+inline size_t find_eol_reverse(std::string_view view, size_t start, const size_t eof)
+{
+    while(view[start] != '\n' && start > 0 && start != eof)
+    {
+        --start;
+    }
+    return start;
+}
+
 #endif //HELPER_H
