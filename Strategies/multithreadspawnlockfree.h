@@ -31,7 +31,7 @@ public:
         constexpr size_t chunk_size = 262144;
         const size_t chunk_num = data.file_size/ chunk_size + 1;
 
-        std::vector<std::pair<float, float>> chunks;
+        std::vector<std::pair<size_t, size_t>> chunks;
         chunks.reserve(chunk_num);
 
         size_t lower = 0;
@@ -60,15 +60,23 @@ public:
             maps.emplace_back();
         }
 
+        std::atomic_int32_t chunk_tracker{0};
         std::vector<uint64_t> line_count(_thread_no,0);
         for (int t = 0; t < _thread_no; ++t)
         {
-            thread_collection.emplace_back([&,t = t, view = data.view, start = static_cast<size_t>(ranges[t].first), end = static_cast<size_t>(ranges[t].second)]
+            thread_collection.emplace_back([&,t = t, view = data.view]
             {
                 std::pair<size_t, size_t> city{0, 0}; //first = starting pos, second = count of characters after first
                 std::pair<size_t, size_t> temp{0, 0}; //first = starting pos, second = count of characters after first
 
                 uint32_t value = 0;
+                const uint32_t chunk_current = chunk_tracker++;
+                if(chunk_current>=chunk_num)
+                {
+                    return;
+                }
+                const size_t start = chunks[chunk_current].first;
+                const size_t end = chunks[chunk_current].second;
                 for (size_t i = start; i < end; ++i)
                 {
                     switch (view[i])
