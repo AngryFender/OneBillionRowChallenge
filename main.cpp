@@ -2,6 +2,7 @@
 #include "mmparser.h"
 #include "Strategies/flyweight.h"
 #include "Strategies/multithreadspawn.h"
+#include "Strategies/multithreadspawnlockfree.h"
 #include "Strategies/parentthread.h"
 #include "Strategies/singlethreadspawn.h"
 
@@ -21,6 +22,12 @@ int main() {
     for (int t = 1; t <= 32; t = t * 2)
     {
         MMParser multi_thread_mm_parser(DATA_FILE_PATH, std::make_unique<MultiThreadSpawn>(t));
+        multi_thread_mm_parser.start();
+    }
+
+    for (int t = 1; t <= 32; t = t * 2)
+    {
+        MMParser multi_thread_mm_parser(DATA_FILE_PATH, std::make_unique<MultiThreadSpawnLockFree>(t));
         multi_thread_mm_parser.start();
     }
 
