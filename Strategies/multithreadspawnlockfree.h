@@ -20,16 +20,16 @@ public:
 
     void parse(const StratInfo& data, StratResult& result) override
     {
-        result.name.append(std::to_string(_thread_no) + " Threads Spawn");
+        result.name.append(std::to_string(_thread_no) + " Threads Spawn for MultiThreadSpawnLockFree ");
 
         using map = std::unordered_map<std::string_view, Data>;
         std::vector<std::thread> thread_collection;
         thread_collection.reserve(_thread_no);
         std::vector<map> maps;
 
-        //dividing the file into 2mb chunks
-        constexpr size_t chunk_size = 262144;
-        const size_t chunk_num = data.file_size/ chunk_size + 1;
+        //dividing the file into 4kb chunks
+        constexpr size_t chunk_size = 4096;
+        const size_t chunk_num = data.file_size/ chunk_size;
 
         std::vector<std::pair<size_t, size_t>> chunks;
         chunks.reserve(chunk_num);
@@ -70,45 +70,46 @@ public:
                 std::pair<size_t, size_t> temp{0, 0}; //first = starting pos, second = count of characters after first
 
                 uint32_t value = 0;
-                const uint32_t chunk_current = chunk_tracker++;
-                if(chunk_current>=chunk_num)
+                uint32_t chunk_current = chunk_tracker++;
+
+                while (chunk_current < chunk_num)
                 {
-                    return;
-                }
-                const size_t start = chunks[chunk_current].first;
-                const size_t end = chunks[chunk_current].second;
-                for (size_t i = start; i < end; ++i)
-                {
-                    switch (view[i])
+                    const size_t start = chunks[chunk_current].first;
+                    const size_t end = chunks[chunk_current].second;
+                    for (size_t i = start; i < end; ++i)
                     {
-                    case ';':
+                        switch (view[i])
                         {
-                            city.second = i - city.first;
-                            temp.first = i + 1;
-                            break;
-                        }
-                    case '\n':
-                        {
-                            temp.second = i - temp.first;
-                            value = parse_value_view(view,temp);
+                        case ';':
                             {
-                                auto& [sum, max, min, count] = maps[t].try_emplace(view.substr(city.first, city.second)).first->second;
-
-                                min = std::min(value, min);
-                                max = std::max(value, max);
-                                sum += value;
-                                ++count;
-
-                                city.first = i + 1;
-                                ++line_count[t];
+                                city.second = i - city.first;
+                                temp.first = i + 1;
+                                break;
                             }
-                            break;
-                        }
-                    default: break;
-                    }
-                }
+                        case '\n':
+                            {
+                                temp.second = i - temp.first;
+                                value = parse_value_view(view, temp);
+                                {
+                                    auto& [sum, max, min, count] = maps[t].try_emplace(
+                                        view.substr(city.first, city.second)).first->second;
 
-                result.total_lines = line_count[t];
+                                    min = std::min(value, min);
+                                    max = std::max(value, max);
+                                    sum += value;
+                                    ++count;
+
+                                    city.first = i + 1;
+                                    ++line_count[t];
+                                }
+                                break;
+                            }
+                        default: break;
+                        }
+                    }
+                    result.total_lines = line_count[t];
+                    chunk_current = chunk_tracker++;
+                }
             });
         }
 
