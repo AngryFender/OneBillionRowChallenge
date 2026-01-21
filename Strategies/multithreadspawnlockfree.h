@@ -15,7 +15,7 @@
 class MultiThreadSpawnLockFree final: public IStrategy
 {
 public:
-    explicit MultiThreadSpawnLockFree(const int num_of_threads = 0):_thread_no(num_of_threads){}
+    explicit MultiThreadSpawnLockFree(const int num_of_threads = 0, const size_t chunk_size = 0):_thread_no(num_of_threads), _chunk_size(chunk_size){}
     ~MultiThreadSpawnLockFree()  override = default;
 
     void parse(const StratInfo& data, StratResult& result) override
@@ -27,9 +27,7 @@ public:
         thread_collection.reserve(_thread_no);
         std::vector<map> maps;
 
-        //dividing the file into 4kb chunks
-        constexpr size_t chunk_size = 4096;
-        const size_t chunk_num = data.file_size/ chunk_size;
+        const size_t chunk_num = data.file_size/ _chunk_size;
 
         std::vector<std::pair<size_t, size_t>> chunks;
         chunks.reserve(chunk_num);
@@ -38,7 +36,7 @@ public:
         size_t higher = 0;
         while (lower < data.file_size)
         {
-            higher = find_eol_reverse(data.view, std::min(data.file_size, higher+chunk_size), data.file_size);
+            higher = find_eol_reverse(data.view, std::min(data.file_size, higher + _chunk_size), data.file_size);
             chunks.emplace_back(lower,higher);
             lower = higher+1;
         }
@@ -123,6 +121,7 @@ public:
     }
 private:
     int _thread_no = 0;
+    size_t _chunk_size = 0;
 };
 
 #endif //MULTITHREADSPAWNLOCKFREE_H
