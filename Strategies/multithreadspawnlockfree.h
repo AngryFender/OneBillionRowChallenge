@@ -27,7 +27,11 @@ public:
         thread_collection.reserve(_thread_no);
         std::vector<map> maps;
 
-        const size_t chunk_num = data.file_size/ _chunk_size;
+        size_t chunk_num = data.file_size/ _chunk_size;
+        if(chunk_num * _chunk_size < data.file_size)
+        {
+            ++chunk_num;
+        }
 
         std::vector<std::pair<size_t, size_t>> chunks;
         chunks.reserve(chunk_num);
@@ -70,7 +74,7 @@ public:
                 uint32_t value = 0;
                 uint32_t chunk_current = chunk_tracker++;
 
-                while (chunk_current < chunk_num)
+                while (chunk_current <= chunk_num)
                 {
                     const size_t start = chunks[chunk_current].first;
                     const size_t end = chunks[chunk_current].second;
