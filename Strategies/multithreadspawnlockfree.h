@@ -22,10 +22,10 @@ public:
     {
         result.name.append(std::to_string(_thread_no) + " Threads Spawn "+std::to_string(_chunk_size)+" chunk_size"+" for MultiThreadSpawnLockFree ");
 
-        using map = std::unordered_map<std::string_view, Data>;
+        using Map = std::unordered_map<std::string_view, Data>;
         std::vector<std::thread> thread_collection;
         thread_collection.reserve(_thread_no);
-        std::vector<map> maps;
+        std::vector<Map> maps;
 
         size_t chunk_num = data.file_size/ _chunk_size;
         if(chunk_num * _chunk_size < data.file_size)
@@ -60,6 +60,8 @@ public:
             ranges.emplace_back(prev, curr);
             prev = ++curr;
             maps.emplace_back();
+            maps.back().reserve(10000);
+            maps.back().max_load_factor(0.7f);
         }
 
         std::atomic_int32_t chunk_tracker{0};
