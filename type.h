@@ -42,8 +42,8 @@ struct String_view_hash
         return std::hash<std::string>{}(s);
     }
 
-    using MapKey = std::unordered_map<std::string, uint32_t, String_view_hash,std::equal_to<>>;
 };
 
+using MapKey = std::unordered_map<std::string, uint32_t, String_view_hash, std::equal_to<>>;
 
 #endif //TYPE_H

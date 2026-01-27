@@ -7,6 +7,7 @@
 #include <thread>
 #include <unordered_map>
 #include <vector>
+#include "../type.h"
 
 #include "../helper.h"
 #include "../data.h"
@@ -22,10 +23,12 @@ public:
     {
         result.name.append(std::to_string(_thread_no) + " Threads Spawn "+std::to_string(_chunk_size)+" chunk_size"+" for MultiThreadSpawnLockFree ");
 
-        using Map = std::unordered_map<std::string_view, Data>;
+        using MapData = std::unordered_map<uint32_t, Data>;
         std::vector<std::thread> thread_collection;
         thread_collection.reserve(_thread_no);
-        std::vector<Map> maps;
+
+        std::vector<MapKey> maps_key;
+        std::vector<MapData> maps_data;
 
         size_t chunk_num = data.file_size/ _chunk_size;
         if(chunk_num * _chunk_size < data.file_size)
@@ -59,9 +62,14 @@ public:
             curr = find_eol(data.view, static_cast<size_t>(std::min(++high * factor, static_cast<float>(data.file_size))), data.file_size);
             ranges.emplace_back(prev, curr);
             prev = ++curr;
-            maps.emplace_back();
-            maps.back().reserve(10000);
-            maps.back().max_load_factor(0.7f);
+
+            maps_key.emplace_back();
+            maps_key.back().reserve(10000);
+            maps_key.back().max_load_factor(0.7f);
+
+            maps_data.emplace_back();
+            maps_data.back().reserve(10000);
+            maps_data.back().max_load_factor(0.7f);
         }
 
         std::atomic_int32_t chunk_tracker{0};
@@ -75,6 +83,8 @@ public:
 
                 uint32_t value = 0;
                 uint32_t chunk_current = chunk_tracker++;
+                std::string_view city_view;
+                uint32_t id = 0;
 
                 while (chunk_current <= chunk_num)
                 {
@@ -95,16 +105,26 @@ public:
                                 temp.second = i - temp.first;
                                 value = parse_value_view(view, temp);
                                 {
-                                    auto& [sum, max, min, count] = maps[t].try_emplace(
-                                        view.substr(city.first, city.second)).first->second;
+                                    city_view = view.substr(city.first, city.second);
+                                    maps_key[t].find(city_view);
 
-                                    min = std::min(value, min);
-                                    max = std::max(value, max);
-                                    sum += value;
-                                    ++count;
+                                    auto it = maps_key[t].find(city_view);
+                                    if(it == maps_key[t].end())
+                                    {
+                                        it->second = id++;
+                                    }
 
-                                    city.first = i + 1;
-                                    ++line_count[t];
+                                    //
+                                    // auto& [sum, max, min, count] = maps_data[t].try_emplace(
+                                    //     view.substr(city.first, city.second)).first->second;
+                                    //
+                                    // min = std::min(value, min);
+                                    // max = std::max(value, max);
+                                    // sum += value;
+                                    // ++count;
+                                    //
+                                    // city.first = i + 1;
+                                    // ++line_count[t];
                                 }
                                 break;
                             }
