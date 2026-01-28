@@ -85,6 +85,7 @@ public:
                 uint32_t chunk_current = chunk_tracker++;
                 std::string_view city_view;
                 uint32_t id = 0;
+                uint32_t current_id = 0;
 
                 while (chunk_current <= chunk_num)
                 {
@@ -106,25 +107,24 @@ public:
                                 value = parse_value_view(view, temp);
                                 {
                                     city_view = view.substr(city.first, city.second);
-                                    maps_key[t].find(city_view);
-
                                     auto it = maps_key[t].find(city_view);
                                     if(it == maps_key[t].end())
                                     {
-                                        it->second = id++;
+                                        maps_key[t].emplace(std::string(city_view),id);
+                                        current_id = id++;
+                                    }else
+                                    {
+                                        current_id = it->second;
                                     }
 
-                                    //
-                                    // auto& [sum, max, min, count] = maps_data[t].try_emplace(
-                                    //     view.substr(city.first, city.second)).first->second;
-                                    //
-                                    // min = std::min(value, min);
-                                    // max = std::max(value, max);
-                                    // sum += value;
-                                    // ++count;
-                                    //
-                                    // city.first = i + 1;
-                                    // ++line_count[t];
+                                    auto& [sum, max, min, count] = maps_data[t].try_emplace(current_id).first->second;
+                                    min = std::min(value, min);
+                                    max = std::max(value, max);
+                                    sum += value;
+                                    ++count;
+
+                                    city.first = i + 1;
+                                    ++line_count[t];
                                 }
                                 break;
                             }
