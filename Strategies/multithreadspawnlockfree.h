@@ -21,7 +21,7 @@ public:
 
     void parse(const StratInfo& data, StratResult& result) override
     {
-        result.name.append(std::to_string(_thread_no) + " Threads Spawn "+std::to_string(_chunk_size)+" chunk_size"+" for MultiThreadSpawnLockFree ");
+        result.name.append(std::to_string(_thread_no) + " Threads Spawn for MultiThreadSpawnLockFree ");
 
         using MapData = std::unordered_map<uint32_t, Data>;
         std::vector<std::thread> thread_collection;
