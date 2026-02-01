@@ -32,6 +32,7 @@ add_executable(OneBillionRowChallenge main.cpp
 		Strategies/flyweight.h
 		Strategies/multithreadspawnlockfree.h
 		type.h
+		Strategies/multithreadspawnlockfreedoublemap.h
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
