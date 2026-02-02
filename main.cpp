@@ -28,13 +28,13 @@ int main() {
 
     for (int t = 1; t <= 32; t = t * 2)
     {
-        MMParser multi_thread_mm_parser(DATA_FILE_PATH, std::make_unique<MultiThreadSpawnLockFree>(t));
+        MMParser multi_thread_mm_parser(DATA_FILE_PATH, std::make_unique<MultiThreadSpawnLockFree>(t,2048));
         multi_thread_mm_parser.start();
     }
 
     for (int t = 1; t <= 32; t = t * 2)
     {
-        MMParser multi_thread_mm_parser(DATA_FILE_PATH, std::make_unique<MultiThreadSpawnLockFreeDoubleMap>(t));
+        MMParser multi_thread_mm_parser(DATA_FILE_PATH, std::make_unique<MultiThreadSpawnLockFreeDoubleMap>(t,2048));
         multi_thread_mm_parser.start();
     }
 
