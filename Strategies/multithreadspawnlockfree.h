@@ -12,6 +12,7 @@
 #include "../helper.h"
 #include "../data.h"
 #include "istrategy.h"
+#include "hash_table7.hpp"
 
 class MultiThreadSpawnLockFree final: public IStrategy
 {
@@ -23,7 +24,8 @@ public:
     {
         result.name.append(std::to_string(_thread_no) + " Threads Spawn "+std::to_string(_chunk_size)+" chunk_size"+" for MultiThreadSpawnLockFree ");
 
-        using MapData = std::unordered_map<std::string_view, Data>;
+        using MapData = emhash7::HashMap<std::string_view, Data>;
+        // using MapData = std::unordered_map<std::string_view, Data>;
         std::vector<std::thread> thread_collection;
         thread_collection.reserve(_thread_no);
 
