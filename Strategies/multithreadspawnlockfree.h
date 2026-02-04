@@ -100,7 +100,7 @@ public:
                                 temp.second = i - temp.first;
                                 value = parse_value_view(view, temp);
                                 {
-                                    auto& [sum, max, min, count] = map[t].try_emplace(view.substr(city.first, city.second)).first->second;
+                                    auto& [sum, max, min, count] = map[t][view.substr(city.first,city.second)];
                                     min = std::min(value, min);
                                     max = std::max(value, max);
                                     sum += value;
