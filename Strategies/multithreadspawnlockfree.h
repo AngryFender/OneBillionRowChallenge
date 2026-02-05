@@ -25,7 +25,6 @@ public:
         result.name.append(std::to_string(_thread_no) + " Threads Spawn "+std::to_string(_chunk_size)+" chunk_size"+" for MultiThreadSpawnLockFree ");
 
         using MapData = emhash7::HashMap<std::string_view, Data>;
-        // using MapData = std::unordered_map<std::string_view, Data>;
         std::vector<std::thread> thread_collection;
         thread_collection.reserve(_thread_no);
 
@@ -66,7 +65,7 @@ public:
 
             map.emplace_back();
             map.back().reserve(10000);
-            map.back().max_load_factor(0.7f);
+            map.back().max_load_factor(0.01f);
         }
 
         std::atomic_int32_t chunk_tracker{0};
