@@ -12,6 +12,7 @@
 #include "../helper.h"
 #include "../data.h"
 #include "istrategy.h"
+#include "hash_table7.hpp"
 
 class MultiThreadSpawnLockFreeDoubleMap final: public IStrategy
 {
@@ -23,11 +24,12 @@ public:
     {
         result.name.append(std::to_string(_thread_no) + " Threads Spawn "+std::to_string(_chunk_size)+" chunk_size"+" for MultiThreadSpawnLockFree ");
 
-        using MapData = std::unordered_map<uint32_t, Data>;
+        using MapData = emhash7::HashMap<uint32_t, Data>;
+        using MapString = emhash7::HashMap<std::string_view,uint32_t>;
         std::vector<std::thread> thread_collection;
         thread_collection.reserve(_thread_no);
 
-        std::vector<MapKey> maps_key;
+        std::vector<MapString> maps_key;
         std::vector<MapData> maps_data;
 
         size_t chunk_num = data.file_size/ _chunk_size;
@@ -106,18 +108,10 @@ public:
                                 temp.second = i - temp.first;
                                 value = parse_value_view(view, temp);
                                 {
-                                    city_view = view.substr(city.first, city.second);
-                                    auto it = maps_key[t].find(city_view);
-                                    if(it == maps_key[t].end())
-                                    {
-                                        maps_key[t].emplace(std::string(city_view),id);
-                                        current_id = id++;
-                                    }else
-                                    {
-                                        current_id = it->second;
-                                    }
+                                    // city_view = view.substr(city.first, city.second);
+                                    current_id = maps_key[t][view.substr(city.first, city.second)];
 
-                                    auto& [sum, max, min, count] = maps_data[t].try_emplace(current_id).first->second;
+                                    auto& [sum, max, min, count] = maps_data[t][current_id];
                                     min = std::min(value, min);
                                     max = std::max(value, max);
                                     sum += value;
