@@ -61,7 +61,7 @@ public:
 
         for (int t = 0; t < _thread_no; ++t)
         {
-            curr = find_eol(data.view, static_cast<size_t>(std::min(++high * factor, static_cast<float>(data.file_size))), data.file_size);
+            curr = find_eol_reverse(data.view, static_cast<size_t>(std::min(++high * factor, static_cast<float>(data.file_size))), data.file_size);
             ranges.emplace_back(prev, curr);
             prev = ++curr;
 
