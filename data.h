@@ -11,6 +11,18 @@ struct Data {
     uint32_t max = MIN_VALUE;
     uint32_t min = MAX_VALUE;
     uint32_t count = 0;
+
+    Data(): sum(0), max(MIN_VALUE), min(MAX_VALUE), count(0)
+    {
+    }
+
+    Data(uint64_t sum, uint32_t max, uint32_t min, uint32_t count)
+        : sum(sum),
+          max(max),
+          min(min),
+          count(count)
+    {
+    }
 };
 
 
