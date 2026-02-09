@@ -13,6 +13,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ggdb3")
 set(DATA_FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Data/weather_stations.csv")
 
 find_package(Boost REQUIRED)
+find_package(xxHash CONFIG REQUIRED)
 get_property(imported_targets DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" PROPERTY IMPORTED_TARGETS)
 MESSAGE(STATUS "Imported targets ➜ ${imported_targets}")
 
@@ -34,7 +35,6 @@ add_executable(OneBillionRowChallenge main.cpp
 		type.h
 		Strategies/multithreadspawnlockfreedoublemap.h
 )
-
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 MESSAGE(STATUS "include directory ➜ ${CMAKE_CURRENT_SOURCE_DIR}")
 target_compile_definitions(${PROJECT_NAME} PRIVATE
@@ -43,4 +43,5 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
 	Boost::boost
+	xxHash::xxhash
 )

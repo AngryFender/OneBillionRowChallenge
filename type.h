@@ -3,8 +3,9 @@
 #include <cstdint>
 #include <string_view>
 #include <unordered_map>
-
+#include <xxhash.h>
 #include "data.h"
+#include "hash_table7.hpp"
 
 struct Key
 {
@@ -45,5 +46,17 @@ struct String_view_hash
 };
 
 using MapKey = std::unordered_map<std::string, uint32_t, String_view_hash, std::equal_to<>>;
+
+
+struct XXHasher
+{
+
+    using is_transparent = void;
+    size_t operator()(const std::string_view view) const
+    {
+        return XXH64(view.data(), view.size(),0);
+    }
+};
+
 
 #endif //TYPE_H
