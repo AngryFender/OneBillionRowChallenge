@@ -45,7 +45,7 @@ public:
         size_t higher = 0;
         while (lower < data.file_size)
         {
-            higher = find_eol_reverse(data.view, std::min(data.file_size, higher + _chunk_size), data.file_size);
+            higher = find_eol(data.view, std::min(data.file_size, higher + _chunk_size), data.file_size);
             chunks.emplace_back(lower,higher);
             lower = higher+1;
         }
@@ -61,7 +61,7 @@ public:
 
         for (int t = 0; t < _thread_no; ++t)
         {
-            curr = find_eol_reverse(data.view, static_cast<size_t>(std::min(++high * factor, static_cast<float>(data.file_size))), data.file_size);
+            curr = find_eol(data.view, static_cast<size_t>(std::min(++high * factor, static_cast<float>(data.file_size))), data.file_size);
             ranges.emplace_back(prev, curr);
             prev = ++curr;
 

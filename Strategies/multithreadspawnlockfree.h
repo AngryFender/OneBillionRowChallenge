@@ -43,7 +43,7 @@ public:
         size_t higher = 0;
         while (lower < data.file_size)
         {
-            higher = find_eol_reverse(data.view, std::min(data.file_size, higher + _chunk_size), data.file_size);
+            higher = find_eol(data.view, std::min(data.file_size, higher + _chunk_size), data.file_size);
             chunks.emplace_back(lower,higher);
             lower = higher+1;
         }
