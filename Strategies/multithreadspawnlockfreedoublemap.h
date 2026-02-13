@@ -50,21 +50,8 @@ public:
             lower = higher+1;
         }
 
-        const float factor = static_cast<float>(data.file_size) / static_cast<float>(_thread_no);
-
-        std::vector<std::pair<float, float>> ranges;
-        ranges.reserve(_thread_no);
-
-        float high = 0;
-        size_t curr = 0;
-        size_t prev = 0;
-
         for (int t = 0; t < _thread_no; ++t)
         {
-            curr = find_eol(data.view, static_cast<size_t>(std::min(++high * factor, static_cast<float>(data.file_size))), data.file_size);
-            ranges.emplace_back(prev, curr);
-            prev = ++curr;
-
             maps_key.emplace_back();
             maps_key.back().reserve(10000);
             maps_key.back().max_load_factor(0.7f);
