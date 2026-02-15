@@ -36,6 +36,8 @@ add_executable(OneBillionRowChallenge main.cpp
 		Strategies/multithreadspawnlockfreedoublemap.h
 		datagenerator.cpp
 		datagenerator.h
+		randomdatagenerator.cpp
+		randomdatagenerator.h
 )
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 MESSAGE(STATUS "include directory ➜ ${CMAKE_CURRENT_SOURCE_DIR}")
