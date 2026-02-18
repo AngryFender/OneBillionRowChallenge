@@ -11,6 +11,8 @@ add_compile_options(-fno-omit-frame-pointer)
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ggdb3")
 
 set(DATA_FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Data/weather_stations.csv")
+set(DATA_INPUT_FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Data/weather_stations.csv")
+set(DATA_OUTPUT_FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Data/weather_stations_test.csv")
 
 find_package(Boost REQUIRED)
 find_package(xxHash CONFIG REQUIRED)
@@ -42,7 +44,9 @@ add_executable(OneBillionRowChallenge main.cpp
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 MESSAGE(STATUS "include directory ➜ ${CMAKE_CURRENT_SOURCE_DIR}")
 target_compile_definitions(${PROJECT_NAME} PRIVATE
-	DATA_FILE_PATH=\"${DATA_FILE_PATH}\"
+		DATA_FILE_PATH=\"${DATA_FILE_PATH}\"
+		DATA_INPUT_FILE_PATH=\"${DATA_INPUT_FILE_PATH}\"
+		DATA_OUTPUT_FILE_PATH=\"${DATA_OUTPUT_FILE_PATH}\"
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
