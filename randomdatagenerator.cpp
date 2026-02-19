@@ -47,12 +47,20 @@ bool RandomDataGenerator::generate(const uint32_t line_limit)
     double raw_temp = 0.0;
     double random_temp = 0.0;
 
-    for(int count = 0 ; count < line_limit; ++count)
+    std::stringstream chunk;
+    int chunk_limit = 0;
+    for (int count = 0; count < line_limit; ++count)
     {
-         random_place_id = id_dist(gen);
-         raw_temp = temp_dist(gen);
-         random_temp = std::clamp<double>(raw_temp, -20.0, 40.0);
-        _output_file << mapData[random_place_id] <<";"<<random_temp<<"\n";
+        random_place_id = id_dist(gen);
+        raw_temp = temp_dist(gen);
+        random_temp = std::clamp<double>(raw_temp, -20.0, 40.0);
+        chunk << mapData[random_place_id] << ";" << random_temp << "\n";
+        if (chunk_limit++ < 10000000)
+        {
+            _output_file << chunk.rdbuf();
+            chunk.str("");
+            chunk_limit = 0;
+        }
     }
     return true;
 }
