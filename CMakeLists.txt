@@ -10,7 +10,7 @@ add_compile_options(-fno-omit-frame-pointer)
 # so 'perf' can show you source code lines
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ggdb3")
 
-set(DATA_FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Data/weather_stations.csv")
+set(DATA_FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Data/weather_stations_test.csv")
 set(DATA_INPUT_FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Data/weather_stations.csv")
 set(DATA_OUTPUT_FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Data/weather_stations_test.csv")
 
