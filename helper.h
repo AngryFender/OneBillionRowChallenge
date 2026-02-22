@@ -12,7 +12,7 @@ inline uint32_t parse_value_view(std::string_view view, const std::pair<size_t, 
     uint32_t value = 0;
     for(size_t i = 0 ; i < temp.second; ++i)
     {
-        if((view[temp.first+i] >= ZERO_DIGIT && view[temp.first+i] <= NINE_DIGIT) || view[temp.first+i] == '.' )
+        if((view[temp.first+i] >= ZERO_DIGIT && view[temp.first+i] <= NINE_DIGIT))
         {
             value = value * 10 + static_cast<int>(view[temp.first + i]) - ZERO_DIGIT;
         }
