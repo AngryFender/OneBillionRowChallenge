@@ -32,6 +32,7 @@ public:
         std::vector<MapString> maps_key;
         std::vector<MapData> maps_data;
 
+
         size_t chunk_num = data.file_size/ _chunk_size;
         if(chunk_num * _chunk_size < data.file_size)
         {
@@ -39,7 +40,6 @@ public:
         }
 
         std::vector<std::pair<size_t, size_t>> chunks;
-        chunks.reserve(chunk_num);
 
         size_t lower = 0;
         size_t higher = 0;
@@ -47,8 +47,9 @@ public:
         {
             higher = find_eol(data.view, std::min(data.file_size, higher + _chunk_size), data.file_size);
             chunks.emplace_back(lower,higher);
-            lower = higher+1;
+            lower = higher + 1;
         }
+        chunk_num = chunks.size();
 
         for (int t = 0; t < _thread_no; ++t)
         {
@@ -73,14 +74,13 @@ public:
                 uint32_t value = 0;
                 uint32_t chunk_current = chunk_tracker++;
                 std::string_view city_view;
-                uint32_t id = 0;
                 uint32_t current_id = 0;
 
                 while (chunk_current <= chunk_num)
                 {
                     const size_t start = chunks[chunk_current].first;
                     const size_t end = chunks[chunk_current].second;
-                    for (size_t i = start; i < end; ++i)
+                    for (size_t i = start; i <= end; ++i)
                     {
                         switch (view[i])
                         {
@@ -94,6 +94,7 @@ public:
                             {
                                 temp.second = i - temp.first;
                                 value = parse_value_view(view, temp);
+
                                 {
                                     // city_view = view.substr(city.first, city.second);
                                     current_id = maps_key[t][view.substr(city.first, city.second)];
@@ -112,7 +113,6 @@ public:
                         default: break;
                         }
                     }
-                    result.total_lines = line_count[t];
                     chunk_current = chunk_tracker++;
                 }
             });
