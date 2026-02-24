@@ -73,10 +73,9 @@ public:
 
                 uint32_t value = 0;
                 uint32_t chunk_current = chunk_tracker++;
-                std::string_view city_view;
                 uint32_t current_id = 0;
 
-                while (chunk_current <= chunk_num)
+                while (chunk_current < chunk_num)
                 {
                     const size_t start = chunks[chunk_current].first;
                     const size_t end = chunks[chunk_current].second;
@@ -96,7 +95,6 @@ public:
                                 value = parse_value_view(view, temp);
 
                                 {
-                                    // city_view = view.substr(city.first, city.second);
                                     current_id = maps_key[t][view.substr(city.first, city.second)];
 
                                     auto& [sum, max, min, count] = maps_data[t][current_id];
