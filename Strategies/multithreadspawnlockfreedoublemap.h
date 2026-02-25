@@ -24,23 +24,16 @@ public:
     {
         result.name.append(std::to_string(_thread_no) + " Threads Spawn "+std::to_string(_chunk_size)+" chunk_size"+" for MultiThreadSpawnLockFreeDoubleMap ");
 
-        using MapData = emhash7::HashMap<uint32_t, Data>;
         using MapString = emhash7::HashMap<std::string_view, uint32_t>;
-        std::vector<std::thread> thread_collection;
-        thread_collection.reserve(_thread_no);
-
+        using MapData = emhash7::HashMap<uint32_t, Data>;
         std::vector<MapString> maps_key;
         std::vector<MapData> maps_data;
 
-
-        size_t chunk_num = data.file_size/ _chunk_size;
-        if(chunk_num * _chunk_size < data.file_size)
-        {
-            ++chunk_num;
-        }
+        //divide file into smaller chunks
+        size_t total_chunk_count = data.file_size/ _chunk_size;
+        total_chunk_count = (total_chunk_count * _chunk_size) < data.file_size ? ++total_chunk_count: total_chunk_count;
 
         std::vector<std::pair<size_t, size_t>> chunks;
-
         size_t lower = 0;
         size_t higher = 0;
         while (lower < data.file_size)
@@ -49,8 +42,10 @@ public:
             chunks.emplace_back(lower,higher);
             lower = higher + 1;
         }
-        chunk_num = chunks.size();
+        total_chunk_count = chunks.size();
 
+        std::vector<std::thread> thread_collection;
+        thread_collection.reserve(_thread_no);
         for (int t = 0; t < _thread_no; ++t)
         {
             maps_key.emplace_back();
@@ -62,7 +57,7 @@ public:
             maps_data.back().max_load_factor(0.7f);
         }
 
-        std::atomic_int32_t chunk_tracker{0};
+        std::atomic_int32_t atomic_chunk_tracker{0};
         std::vector<uint64_t> line_count(_thread_no,0);
         for (int t = 0; t < _thread_no; ++t)
         {
@@ -72,13 +67,13 @@ public:
                 std::pair<size_t, size_t> temp{0, 0}; //first = starting pos, second = count of characters after first
 
                 uint32_t value = 0;
-                uint32_t chunk_current = chunk_tracker++;
+                uint32_t thread_chunk = atomic_chunk_tracker++;
                 uint32_t current_id = 0;
 
-                while (chunk_current < chunk_num)
+                while (thread_chunk < total_chunk_count)
                 {
-                    const size_t start = chunks[chunk_current].first;
-                    const size_t end = chunks[chunk_current].second;
+                    const size_t start = chunks[thread_chunk].first;
+                    const size_t end = chunks[thread_chunk].second;
                     for (size_t i = start; i <= end; ++i)
                     {
                         switch (view[i])
@@ -111,7 +106,7 @@ public:
                         default: break;
                         }
                     }
-                    chunk_current = chunk_tracker++;
+                    thread_chunk = atomic_chunk_tracker++;
                 }
             });
         }
@@ -122,6 +117,7 @@ public:
                 t.join();
         }
 
+        // Accumulate all the line counts from all the threads
         result.total_lines = std::accumulate(line_count.begin(),line_count.end(),0);
     }
 private:
