@@ -58,7 +58,7 @@ public:
         }
 
         std::atomic_int32_t atomic_chunk_tracker{0};
-        std::vector<uint64_t> line_count(_thread_no,0);
+        std::vector<uint64_t> line_count(_thread_no,int64_t{0});
         for (int t = 0; t < _thread_no; ++t)
         {
             thread_collection.emplace_back([&,t = t, view = data.view]
@@ -118,7 +118,7 @@ public:
         }
 
         // Accumulate all the line counts from all the threads
-        result.total_lines = std::accumulate(line_count.begin(),line_count.end(),0);
+        result.total_lines = std::accumulate(line_count.begin(),line_count.end(),uint64_t{0});
     }
 private:
     int _thread_no = 0;
