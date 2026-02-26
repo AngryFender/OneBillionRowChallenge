@@ -3,6 +3,12 @@
 #include <cstdint>
 #include <fstream>
 
+constexpr int PRECISION_LEN = 4;
+constexpr int LINE_CHUNK = 10000000;
+constexpr int LOWEST_TEMP = -20;
+constexpr int HIGHEST_TEMP = 40;
+
+
 class RandomDataGenerator {
 public:
     explicit RandomDataGenerator(const char* input_file_path, const char* output_file_path): _input_file(input_file_path), _output_file(output_file_path)

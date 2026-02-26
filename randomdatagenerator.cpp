@@ -5,6 +5,7 @@
 #include <random>
 #include <bits/algorithmfwd.h>
 #include <algorithm>
+#include <iomanip>
 #include <sstream>
 
 bool RandomDataGenerator::generate(const uint32_t line_limit)
@@ -53,9 +54,9 @@ bool RandomDataGenerator::generate(const uint32_t line_limit)
     {
         random_place_id = id_dist(gen);
         raw_temp = temp_dist(gen);
-        random_temp = std::clamp<double>(raw_temp, -20.0, 40.0);
-        chunk << mapData[random_place_id] << ";" << random_temp << "\n";
-        if (chunk_limit++ < 10000000)
+        random_temp = std::clamp<double>(raw_temp, LOWEST_TEMP, HIGHEST_TEMP);
+        chunk << mapData[random_place_id] << ";"<< std::fixed <<std::setprecision(PRECISION_LEN)<< random_temp << "\n";
+        if (chunk_limit++ < LINE_CHUNK)
         {
             _output_file << chunk.rdbuf();
             chunk.str("");
