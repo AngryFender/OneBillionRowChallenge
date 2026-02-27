@@ -6,16 +6,26 @@
 
 constexpr int ZERO_DIGIT = 48;
 constexpr int NINE_DIGIT = 57;
+constexpr int MINUS = 45;
 
-inline uint32_t parse_value_view(std::string_view view, const std::pair<size_t, size_t>& temp)
+inline int32_t parse_value_view(std::string_view view, const std::pair<size_t, size_t>& temp)
 {
-    uint32_t value = 0;
+    int32_t value = 0;
+    bool minus = false;
     for(size_t i = 0 ; i < temp.second; ++i)
     {
         if((view[temp.first+i] >= ZERO_DIGIT && view[temp.first+i] <= NINE_DIGIT))
         {
             value = value * 10 + static_cast<int>(view[temp.first + i]) - ZERO_DIGIT;
         }
+        else if(view[temp.first+1] == 45)
+        {
+            minus = true;
+        }
+    }
+    if(minus)
+    {
+        value = -value;
     }
     return value;
 }
