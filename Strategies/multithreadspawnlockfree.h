@@ -64,7 +64,7 @@ public:
                 std::pair<size_t, size_t> city{0, 0}; //first = starting pos, second = count of characters after first
                 std::pair<size_t, size_t> temp{0, 0}; //first = starting pos, second = count of characters after first
 
-                uint32_t value = 0;
+                int32_t value = 0;
                 uint32_t chunk_current = chunk_tracker++;
 
                 while (chunk_current <= chunk_num)

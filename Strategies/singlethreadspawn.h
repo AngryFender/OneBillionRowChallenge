@@ -23,7 +23,7 @@ public:
             std::pair<size_t, size_t> temp{0, 0}; //first = starting pos, second = count of characters after first
 
             std::unordered_map<std::string_view, Data> map;
-            uint32_t value = 0;
+            int32_t value = 0;
             uint64_t total_lines = 0;
             for (size_t i = 0; i < data.file_size; ++i)
             {

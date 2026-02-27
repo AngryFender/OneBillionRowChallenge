@@ -24,7 +24,7 @@ public:
         using Location = boost::flyweight<std::string>;
         std::unordered_map<Location, Data> map;
 
-        uint32_t value = 0;
+        int32_t value = 0;
         uint64_t counts = 0;
 
         for (size_t i = 0; i < data.file_size; ++i)

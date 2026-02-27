@@ -20,7 +20,7 @@ public:
 
         std::unordered_map<std::string_view, Data> map;
         const std::string_view view = data.view;
-        uint32_t value = 0;
+        int32_t value = 0;
 
         for (size_t i = 0; i < data.file_size; ++i)
         {

@@ -26,7 +26,7 @@ bool NaiveParser::start()
     value_buffer.reserve(GLOBAL::LINE_LEN);
 
     uint64_t total_lines = 0;
-    uint32_t value = 0;
+    int32_t value = 0;
 
     while(std::getline(_file, line_buffer))
     {

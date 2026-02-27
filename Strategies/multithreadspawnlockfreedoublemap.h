@@ -66,7 +66,7 @@ public:
                 std::pair<size_t, size_t> city{0, 0}; //first = starting pos, second = count of characters after first
                 std::pair<size_t, size_t> temp{0, 0}; //first = starting pos, second = count of characters after first
 
-                uint32_t value = 0;
+                int value = 0;
                 uint32_t thread_chunk = atomic_chunk_tracker++;
                 uint32_t current_id = 0;
 
