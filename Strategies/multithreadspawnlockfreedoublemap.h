@@ -50,11 +50,11 @@ public:
         {
             maps_key.emplace_back();
             maps_key.back().reserve(10000);
-            maps_key.back().max_load_factor(0.7f);
+            maps_key.back().max_load_factor(0.1f);
 
             maps_data.emplace_back();
             maps_data.back().reserve(10000);
-            maps_data.back().max_load_factor(0.7f);
+            maps_data.back().max_load_factor(0.1f);
         }
 
         std::atomic_int32_t atomic_chunk_tracker{0};
