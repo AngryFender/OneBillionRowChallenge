@@ -72,7 +72,6 @@ public:
 
                 while (thread_chunk < total_chunk_count)
                 {
-
                     const size_t start = chunks[thread_chunk].first;
                     const size_t end = chunks[thread_chunk].second;
                     city.first = start;
@@ -123,6 +122,14 @@ public:
             if (t.joinable())
                 t.join();
         }
+
+        // for(int t = 0; t < _thread_no; ++t)
+        // {
+        //     for(auto it = maps_data[t].begin(); it != maps_data[t].end(); ++it)
+        //     {
+        //         std::cout<< it->bucket<<std::endl;
+        //     }
+        // }
 
         // Accumulate all the line counts from all the threads
         result.total_lines = std::accumulate(line_count.begin(),line_count.end(),uint64_t{0});
