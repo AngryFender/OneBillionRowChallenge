@@ -68,12 +68,15 @@ public:
 
                 int value = 0;
                 uint32_t thread_chunk = atomic_chunk_tracker++;
-                uint32_t current_id = 0;
+                uint32_t counter = 0;
 
                 while (thread_chunk < total_chunk_count)
                 {
+
                     const size_t start = chunks[thread_chunk].first;
                     const size_t end = chunks[thread_chunk].second;
+                    city.first = start;
+
                     for (size_t i = start; i <= end; ++i)
                     {
                         switch (view[i])
@@ -90,7 +93,11 @@ public:
                                 value = parse_value_view(view, temp);
 
                                 {
-                                    current_id = maps_key[t][view.substr(city.first, city.second)];
+                                    auto& current_id = maps_key[t][view.substr(city.first, city.second)];
+                                    if(current_id <1)
+                                    {
+                                        current_id = ++counter;
+                                    }
 
                                     auto& [sum, max, min, count] = maps_data[t][current_id];
                                     min = std::min(value, min);
