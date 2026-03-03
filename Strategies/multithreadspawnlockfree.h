@@ -45,8 +45,8 @@ public:
         for (int t = 0; t < _thread_no; ++t)
         {
             map.emplace_back();
-            map.back().reserve(10000);
-            map.back().max_load_factor(0.07f);
+            map.back().reserve(2000);
+            map.back().max_load_factor(0.7f);
         }
 
         std::atomic_int32_t atomic_chunk_tracker{0};

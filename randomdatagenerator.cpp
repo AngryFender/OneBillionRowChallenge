@@ -18,8 +18,8 @@ bool RandomDataGenerator::generate(const uint32_t line_limit)
     uint32_t current_line_counts = 0;
     std::unordered_set<std::string> setPlace;
     std::unordered_map<int, std::string> mapData;
-    setPlace.reserve(10000);
-    mapData.reserve(10000);
+    setPlace.reserve(1000);
+    mapData.reserve(1000);
 
     std::string place;
     std::string value;
@@ -34,6 +34,7 @@ bool RandomDataGenerator::generate(const uint32_t line_limit)
         }
         ++current_line_counts;
     }
+    std::cout << "Total number of places = " << setPlace.size();
 
     std::random_device rd;
     std::mt19937 gen(rd());
