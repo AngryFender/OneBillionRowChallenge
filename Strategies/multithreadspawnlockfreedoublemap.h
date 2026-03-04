@@ -26,8 +26,10 @@ public:
 
         using MapString = emhash7::HashMap<std::string_view, uint32_t>;
         using MapData = emhash7::HashMap<uint32_t, Data>;
+        using MapPlace = emhash7::HashMap<uint32_t, std::pair<size_t,size_t>>;
         std::vector<MapString> maps_key;
         std::vector<MapData> maps_data;
+        std::vector<MapPlace> maps_place;
 
         //divide file into smaller chunks
         size_t total_chunk_count = data.file_size/ _chunk_size;
@@ -55,6 +57,10 @@ public:
             maps_data.emplace_back();
             maps_data.back().reserve(2000);
             maps_data.back().max_load_factor(0.7f);
+
+            maps_place.emplace_back();
+            maps_place.back().reserve(2000);
+            maps_place.back().max_load_factor(0.7f);
         }
 
         std::atomic_int32_t atomic_chunk_tracker{0};
@@ -96,6 +102,8 @@ public:
                                     if(current_id <1)
                                     {
                                         current_id = ++counter;
+                                        auto& place = maps_place[t][current_id];
+                                        place.swap(city);
                                     }
 
                                     auto& [sum, max, min, count] = maps_data[t][current_id];
