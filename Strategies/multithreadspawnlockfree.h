@@ -2,6 +2,7 @@
 #define MULTITHREADSPAWNLOCKFREE_H
 
 #include <numeric>
+#include <set>
 #include <string>
 #include <string_view>
 #include <thread>
@@ -24,7 +25,9 @@ public:
     {
         result.name.append(std::to_string(_thread_no) + " Threads Spawn "+std::to_string(_chunk_size)+" chunk_size"+" for MultiThreadSpawnLockFree ");
 
-        using MapData = emhash7::HashMap<std::string_view, Data>;
+        // using MapData = emhash7::HashMap<std::string_view, Data>;
+        using MapData = std::unordered_map<std::string_view, Data>;
+        std::set<std::string_view> set;
         std::vector<MapData> map;
 
         size_t total_chunk_count = 0;
@@ -74,6 +77,10 @@ public:
                         case ';':
                             {
                                 city.second = i - city.first;
+                                if (t == 0)
+                                {
+                                    set.emplace(view.substr(city.first, city.second));
+                                }
                                 temp.first = i + 1;
                                 break;
                             }
