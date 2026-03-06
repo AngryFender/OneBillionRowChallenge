@@ -114,6 +114,22 @@ public:
                 t.join();
         }
 
+        // accumulate all the fields
+        for(auto it = set.begin(); it != set.end(); ++it )
+        {
+
+            for(int t = 1; t < _thread_no; ++t)
+            {
+                auto& [t_sum, t_max, t_min, t_count] = map[t][*it];
+                auto& [sum, max, min, count] = map[t][*it];
+                sum += t_sum;
+                min = std::min(min, t_min);
+                max = std::max(max, t_max);
+                count += t_count;
+            }
+
+        }
+
         result.total_lines = std::accumulate(line_count.begin(),line_count.end(),uint64_t{0});
     }
 private:
