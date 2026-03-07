@@ -115,21 +115,27 @@ public:
         }
 
         // accumulate all the fields
+        double average = 0.0f;
+        std::stringstream output;
         for(auto it = set.begin(); it != set.end(); ++it )
         {
 
             for(int t = 1; t < _thread_no; ++t)
             {
                 auto& [t_sum, t_max, t_min, t_count] = map[t][*it];
-                auto& [sum, max, min, count] = map[t][*it];
+                auto& [sum, max, min, count] = map[0][*it];
                 sum += t_sum;
                 min = std::min(min, t_min);
                 max = std::max(max, t_max);
                 count += t_count;
             }
-
+            {
+                auto& [sum, max, min, count] = map[0][*it];
+                sum = static_cast<int64_t>(static_cast<double>(sum)/(static_cast<double>(count)*10000.0f));
+                output << *it << " - min = " << min << ", max = " << max << ", average = " << average <<",count ="<<count << "\n";
+            }
         }
-
+        std::cout << output.str();
         result.total_lines = std::accumulate(line_count.begin(),line_count.end(),uint64_t{0});
     }
 private:
