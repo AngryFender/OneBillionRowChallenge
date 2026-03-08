@@ -1,6 +1,7 @@
 #ifndef MULTITHREADSPAWNLOCKFREE_H
 #define MULTITHREADSPAWNLOCKFREE_H
 
+#include <format>
 #include <numeric>
 #include <set>
 #include <string>
@@ -115,8 +116,13 @@ public:
         }
 
         // accumulate all the fields
-        double average = 0.0f;
-        std::stringstream output;
+        double d_min = 0.0f;
+        double d_max = 0.0f;
+        double d_average = 0.0f;
+
+        std::string output;
+        output.reserve(set.size()*(25+7+7+6+7+10+9+8+6+3+2));
+        auto out_it = std::back_inserter(output);
         for(auto it = set.begin(); it != set.end(); ++it )
         {
 
@@ -131,11 +137,13 @@ public:
             }
             {
                 auto& [sum, max, min, count] = map[0][*it];
-                sum = static_cast<int64_t>(static_cast<double>(sum)/(static_cast<double>(count)*10000.0f));
-                output << *it << " - min = " << min << ", max = " << max << ", average = " << average <<",count ="<<count << "\n";
+                d_min = static_cast<double>(min)/10000.0f;
+                d_max = static_cast<double>(max)/10000.0f;
+                d_average = static_cast<double>(sum)/(static_cast<double>(count)*10000.0f);
+                std::format_to(out_it, "{} - min={:.4f}, max={:.4f}, average={:.4f}, count={}\n", *it, d_min, d_max, d_average, count);
             }
         }
-        std::cout << output.str();
+        std::cout << output;
         result.total_lines = std::accumulate(line_count.begin(),line_count.end(),uint64_t{0});
     }
 private:
