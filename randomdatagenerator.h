@@ -5,8 +5,8 @@
 
 constexpr int PRECISION_LEN = 4;
 constexpr int LINE_CHUNK = 10000000;
-constexpr int LOWEST_TEMP = -20;
-constexpr int HIGHEST_TEMP = 40;
+constexpr int LOWEST_TEMP = -25;
+constexpr int HIGHEST_TEMP = 75;
 
 
 class RandomDataGenerator {
