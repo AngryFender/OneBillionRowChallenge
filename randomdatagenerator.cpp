@@ -5,6 +5,7 @@
 #include <random>
 #include <bits/algorithmfwd.h>
 #include <algorithm>
+#include <format>
 #include <iomanip>
 #include <sstream>
 
@@ -17,9 +18,9 @@ bool RandomDataGenerator::generate(const uint32_t line_limit)
 
     uint32_t current_line_counts = 0;
     std::unordered_set<std::string> setPlace;
-    std::unordered_map<int, std::string> mapData;
+    std::vector<std::string> vecData;
     setPlace.reserve(1000);
-    mapData.reserve(1000);
+    vecData.reserve(1000);
 
     std::string place;
     std::string value;
@@ -30,7 +31,8 @@ bool RandomDataGenerator::generate(const uint32_t line_limit)
         if (!setPlace.contains(place))
         {
             setPlace.insert(place);
-            mapData[++place_id] = place;
+            vecData.push_back(place);
+            ++place_id;
         }
         ++current_line_counts;
     }
@@ -39,7 +41,7 @@ bool RandomDataGenerator::generate(const uint32_t line_limit)
     std::random_device rd;
     std::mt19937 gen(rd());
 
-    std::uniform_int_distribution<int> id_dist(1, place_id);
+    std::uniform_int_distribution<int> id_dist(0, place_id);
     std::normal_distribution<double> temp_dist(10.0, 10.0);
 
     _output_file.clear();
@@ -49,19 +51,23 @@ bool RandomDataGenerator::generate(const uint32_t line_limit)
     double raw_temp = 0.0;
     double random_temp = 0.0;
 
-    std::stringstream chunk;
+    std::string chunk;
+    chunk.reserve(LINE_CHUNK);
+    auto output_it = std::back_inserter(chunk);
+
     int chunk_limit = 0;
     for (int count = 0; count < line_limit; ++count)
     {
         random_place_id = id_dist(gen);
         raw_temp = temp_dist(gen);
         random_temp = std::clamp<double>(raw_temp, LOWEST_TEMP, HIGHEST_TEMP);
-        chunk << mapData[random_place_id] << ";"<< std::fixed <<std::setprecision(PRECISION_LEN)<< random_temp << "\n";
-        if (chunk_limit++ < LINE_CHUNK)
+        std::format_to(output_it, "{};{:.4f}\n",vecData[random_place_id], random_temp);
+        if (++chunk_limit >= LINE_CHUNK)
         {
-            _output_file << chunk.rdbuf();
-            chunk.str("");
+            _output_file << chunk;
             chunk_limit = 0;
+            chunk.clear();
+            output_it = std::back_inserter(chunk);
         }
     }
     return true;
