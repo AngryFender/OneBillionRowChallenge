@@ -7,10 +7,8 @@
 #include <string>
 #include <string_view>
 #include <thread>
-#include <unordered_map>
 #include <vector>
 #include "../type.h"
-
 #include "../helper.h"
 #include "../data.h"
 #include "istrategy.h"
@@ -26,8 +24,7 @@ public:
     {
         result.name.append(std::to_string(_thread_no) + " Threads Spawn "+std::to_string(_chunk_size)+" chunk_size"+" for MultiThreadSpawnLockFree ");
 
-        // using MapData = emhash7::HashMap<std::string_view, Data>;
-        using MapData = std::unordered_map<std::string_view, Data>;
+        using MapData = emhash7::HashMap<std::string_view, Data>;
         std::set<std::string_view> set;
         std::vector<MapData> map;
 
@@ -121,11 +118,10 @@ public:
         double d_average = 0.0f;
 
         std::string output;
-        output.reserve(set.size()*(25+7+7+6+7+10+9+8+6+3+2));
+        output.reserve(set.size()*(25+5+7+5+7+9+9+8+6+3+2));
         auto out_it = std::back_inserter(output);
         for(auto it = set.begin(); it != set.end(); ++it )
         {
-
             for(int t = 1; t < _thread_no; ++t)
             {
                 auto& [t_sum, t_max, t_min, t_count] = map[t][*it];
@@ -140,7 +136,7 @@ public:
                 d_min = static_cast<double>(min)/10000.0f;
                 d_max = static_cast<double>(max)/10000.0f;
                 d_average = static_cast<double>(sum)/(static_cast<double>(count)*10000.0f);
-                std::format_to(out_it, "{} - min={:.4f}, max={:.4f}, average={:.4f}, count={}\n", *it, d_min, d_max, d_average, count);
+                std::format_to(out_it, "{}:min={:.4f},max={:.4f},average={:.4f},count={}\n", *it, d_min, d_max, d_average, count);
             }
         }
         std::cout << output;
