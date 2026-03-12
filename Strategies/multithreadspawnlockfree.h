@@ -136,7 +136,7 @@ public:
                 d_min = static_cast<double>(min)/10000.0f;
                 d_max = static_cast<double>(max)/10000.0f;
                 d_average = static_cast<double>(sum)/(static_cast<double>(count)*10000.0f);
-                std::format_to(out_it, "{}:min={:.4f},max={:.4f},average={:.4f},count={}\n", *it, d_min, d_max, d_average, count);
+                std::format_to(out_it, "{}={:.1f}/{:.1f}/{:.1f}, ", *it, d_min,  d_average, d_max);
             }
         }
         std::cout << output;
